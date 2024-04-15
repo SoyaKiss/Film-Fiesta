@@ -1,6 +1,7 @@
-let http = require("http"),
+var http = require("http"),
   fs = require("fs"),
-  url = require("url");
+  url = require("url"),
+  path = require("path");
 http
   .createServer((request, response) => {
     let addr = request.url,
@@ -8,7 +9,7 @@ http
       filePath = "";
 
     fs.appendFile(
-      "log.txt",
+      path.join(__dirname, "log.txt"),
       "URL: " + addr + "\nTimestamp: " + new Date() + "\n\n",
       (err) => {
         if (err) {
@@ -19,10 +20,10 @@ http
       }
     );
 
-    if (q.pathname.includes("documentation")) {
-      filePath = __dirname + "/documentation.html";
+    if (q.pathname.includes("../documentation")) {
+      filePath = path.join(__dirname, "../documentation.html");
     } else {
-      filePath = "index.html";
+      filePath = path.join(__dirname, "index.html");
     }
 
     fs.readFile(filePath, (err, data) => {
