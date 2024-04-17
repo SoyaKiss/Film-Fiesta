@@ -1,84 +1,80 @@
 let express = require("express");
-let morgan = require("morgan");
+let bodyParser = require("body-parser");
+let uuid = require("uuid");
 let app = express();
 
-app.use(express.static("public"));
-app.use(morgan("common"));
+app.use(bodyParser.json());
 
-let myTopMovies = [
+let users = [
   {
-    title: "Mission Impossible",
-    year: "1996",
-    genre: "Action",
-    mainActor: "Tom Cruise",
-  },
-  {
-    title: "Old School",
-    year: "2003",
-    genre: "Comedy",
-    mainActor: "Will Ferell",
-  },
-  {
-    title: "A Time to Kill",
-    year: "1996",
-    genre: "Thriller",
-    mainActor: "Matthew McConaughey",
-  },
-  {
-    title: "The Hunger Games",
-    year: "2012",
-    genre: "Action",
-    mainActor: "Jennifer Lawrence",
-  },
-  {
-    title: "Guardians of the Galaxy",
-    year: "2014",
-    genre: "Action",
-    mainActor: "Chris Pratt",
-  },
-  {
-    title: "Jack Reacher",
-    year: "2012",
-    genre: "Action",
-    mainActor: "Tom Cruise",
-  },
-  {
-    title: "The Notebook",
-    year: "2004",
-    genre: "Romance",
-    mainActor: "Rachel McAdams",
-  },
-  {
-    title: "Wonder Woman",
-    year: "2017",
-    genre: "Action",
-    mainActor: "Gal Gadot",
-  },
-  {
-    title: "Training Day",
-    year: "2001",
-    genre: "Thriller",
-    mainActor: "Denzel Washington",
-  },
-  {
-    title: "The Gray Man",
-    year: "2022",
-    genre: "Action",
-    mainActor: "Ryan Gosling",
+    id: "001",
+    username: "Patty",
+    email: "patty@gmail.com",
+    favlist: [],
   },
 ];
 
+let movies = [
+  {
+    Title: "Mission Impossible",
+    Description:
+      "An American agent, under false suspicion of disloyalty, must discover and expose the real spy without the help of his organization.",
+    Year: "1996",
+    Genre: "Action",
+    ImageURL:
+      "https://www.imdb.com/title/tt0117060/mediaviewer/rm560158209/?ref_=tt_ov_i",
+    Main: {
+      Name: "Tom Cruise",
+      Birthday: "July 3 1962",
+      Height: "5'7",
+    },
+    Secondary: {
+      Name: "Jon Voight",
+      Birthday: "December 29 1938",
+      Height: "6'3",
+    },
+  },
+];
+
+// This is to GET the full list of movies to users
 app.get("/movies", (req, res) => {
-  res.json(myTopMovies);
+  res.status(200).json(movies);
 });
 
-app.get("/", (req, res) => {
-  res.send("This is a random response!");
+// Return data by single movie - title
+app.get("/movies/:Title", (req, res) => {
+  let { title } = req.params;
+  let movie = movies.find((movie) => movie.Title === title);
+
+  if (movie) {
+    res.status(200).json(movie.Title);
+  } else {
+    res.status(400).send("nope, try again!");
+  }
 });
 
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).send("Something went wrong!");
+// Return the data by genre only
+app.get("/movies/genre/:genre", (req, res) => {
+  let { genre } = req.params;
+  let movieGenre = movies.find((movie) => movie.Genre === genre);
+
+  if (genre) {
+    res.status(200).json(genre);
+  } else {
+    res.status(400).send("nope, not this type of movie.");
+  }
+});
+
+// Return the data by Main Actor
+app.get("/movies/main/:mainName", (req, res) => {
+  let { mainName } = req.params;
+  let main = movies.find((movie) => movie.Main.Name === mainName);
+
+  if (main) {
+    res.status(200).json(mainName);
+  } else {
+    res.status(400).send("nope, not in these movies.");
+  }
 });
 
 app.listen(8080, () => {

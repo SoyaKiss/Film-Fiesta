@@ -1,0 +1,25 @@
+:root {
+  --darkestBlue: #16697a;
+  --blue: #489fb5;
+  --lightBlue: #82c0cc;
+  --grey: #ede7e3;
+  --orange: #ffa62b;
+}
+
+table,
+th,
+td {
+  border: 1px solid grey;
+  border-collapse: collapse;
+  color: var(--grey);
+}
+
+th,
+td {
+  background-color: var(--darkestBlue);
+}
+
+.strongTitle {
+  font-size: 20px;
+  text-align: center;
+}

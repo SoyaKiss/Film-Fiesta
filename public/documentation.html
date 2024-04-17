@@ -3,18 +3,122 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../css/styles.css" />
     <title>DOCUMENTATION</title>
   </head>
   <body>
     <h1>Film Fiesta</h1>
-    <p>
-      This web application will house a directory of movies; actors, and
-      categories.
-    </p>
-    <p>
-      Users will be able to access this information, sign up and update their
-      personal information.
-    </p>
-    <p>They will also be able to create a favorite's list.</p>
+    <br />
+    <h3>Movie Endpoints</h3>
+    <table style="width: 100%">
+      <tr class="strongTitle" style="height: 75px">
+        <td>Business Logic</td>
+        <td>URL Endpoint</td>
+        <td>HTTP Method</td>
+        <td>Request Body Data Format</td>
+        <td>Response Body Data Format</td>
+      </tr>
+      <tr>
+        <td>Get a full list of movies</td>
+        <td>/movies</td>
+        <td>GET</td>
+        <td>None</td>
+        <td>a JSON object holding data about all movies</td>
+      </tr>
+      <tr>
+        <td>Get the title of the movie</td>
+        <td>/movies/:Title</td>
+        <td>GET</td>
+        <td>None</td>
+        <td>a JSON object holding data; the movie's title</td>
+      </tr>
+      <tr>
+        <td>Get the description about the movie</td>
+        <td>/movies/:Description</td>
+        <td>GET</td>
+        <td>None</td>
+        <td>a JSON object holding data; the movie's description</td>
+      </tr>
+      <tr>
+        <td>Get the year the movie was made</td>
+        <td>/movies/:Year</td>
+        <td>GET</td>
+        <td>None</td>
+        <td>a JSON object holding data; the year the movie was made</td>
+      </tr>
+      <tr>
+        <td>Get the genre of the movie</td>
+        <td>/movies/:Genre</td>
+        <td>GET</td>
+        <td>None</td>
+        <td>a JSON object holding data; the genre of the movie</td>
+      </tr>
+      <tr>
+        <td>Get an image URL of the movie</td>
+        <td>/movies/:ImageURL</td>
+        <td>GET</td>
+        <td>None</td>
+        <td>an image URL</td>
+      </tr>
+      <tr>
+        <td>Get the main actor's name, birthday, height</td>
+        <td>/movies/:Main</td>
+        <td>GET</td>
+        <td>None</td>
+        <td>a JSON object; nested array {name: , birthday: , height: ,}</td>
+      </tr>
+      <tr>
+        <td>Get the secondary actor's name, birthday, height</td>
+        <td>/movies/:Secondary</td>
+        <td>GET</td>
+        <td>None</td>
+        <td>a JSON object; nested array {name: , birthday: , height: ,}</td>
+      </tr>
+    </table>
+    <br />
+    <br />
+    <h3>User Endpoints</h3>
+    <table style="width: 100%">
+      <tr class="strongTitle" style="height: 75px">
+        <td>Business Logic</td>
+        <td>URL Endpoint</td>
+        <td>HTTP Method</td>
+        <td>Request Body Data Format</td>
+        <td>Response Body Data Format</td>
+      </tr>
+      <tr>
+        <td>Allow new users to register</td>
+        <td>/login</td>
+        <td>POST</td>
+        <td>JSON object; empty fields {name, email,}</td>
+        <td>a JSON object holding data about the user</td>
+      </tr>
+      <tr>
+        <td>Allow user to update their user info (username)</td>
+        <td>/login/:username</td>
+        <td>PUT</td>
+        <td>JSON object of users info</td>
+        <td>a text message saying "Update Success!"</td>
+      </tr>
+      <td>Allow user to deregister</td>
+      <td>/login/:username</td>
+      <td>DELETE</td>
+      <td>None</td>
+      <td>a text message saying "Sad to see you go."</td>
+      <tr>
+        <td>Allow user to add a movie to their favlist</td>
+        <td>/login/username/:favlist</td>
+        <td>PUT</td>
+        <td>None</td>
+        <td>a text message saying "Movie Added!"</td>
+      </tr>
+      <tr>
+        <td>Allow user to delete a movie from their favlist</td>
+        <td>/login/username/:favlist</td>
+        <td>DELETE</td>
+        <td>None</td>
+        <td>a text message saying "Movie Removed!"</td>
+      </tr>
+    </table>
   </body>
 </html>
