@@ -23,56 +23,28 @@
         <td>/movies</td>
         <td>GET</td>
         <td>None</td>
-        <td>a JSON object holding data about all movies</td>
+        <td>a JSON object holding data about all movies in array</td>
       </tr>
       <tr>
         <td>Get the title of the movie</td>
         <td>/movies/:Title</td>
         <td>GET</td>
         <td>None</td>
-        <td>a JSON object holding data; the movie's title</td>
+        <td>a JSON object holding all the data about the movie</td>
       </tr>
+      <td>Get the genre of the movie</td>
+      <td>/movies/genre/:genre</td>
+      <td>GET</td>
+      <td>None</td>
+      <td>A string; list of all movies under that genre</td>
       <tr>
-        <td>Get the description about the movie</td>
-        <td>/movies/:Description</td>
+        <td>Get the main actor's name</td>
+        <td>/movies/main/:mainName</td>
         <td>GET</td>
         <td>None</td>
-        <td>a JSON object holding data; the movie's description</td>
-      </tr>
-      <tr>
-        <td>Get the year the movie was made</td>
-        <td>/movies/:Year</td>
-        <td>GET</td>
-        <td>None</td>
-        <td>a JSON object holding data; the year the movie was made</td>
-      </tr>
-      <tr>
-        <td>Get the genre of the movie</td>
-        <td>/movies/:Genre</td>
-        <td>GET</td>
-        <td>None</td>
-        <td>a JSON object holding data; the genre of the movie</td>
-      </tr>
-      <tr>
-        <td>Get an image URL of the movie</td>
-        <td>/movies/:ImageURL</td>
-        <td>GET</td>
-        <td>None</td>
-        <td>an image URL</td>
-      </tr>
-      <tr>
-        <td>Get the main actor's name, birthday, height</td>
-        <td>/movies/:Main</td>
-        <td>GET</td>
-        <td>None</td>
-        <td>a JSON object; nested array {name: , birthday: , height: ,}</td>
-      </tr>
-      <tr>
-        <td>Get the secondary actor's name, birthday, height</td>
-        <td>/movies/:Secondary</td>
-        <td>GET</td>
-        <td>None</td>
-        <td>a JSON object; nested array {name: , birthday: , height: ,}</td>
+        <td>
+          A string; list of all the movies that this actor is the main actor
+        </td>
       </tr>
     </table>
     <br />
@@ -88,36 +60,42 @@
       </tr>
       <tr>
         <td>Allow new users to register</td>
-        <td>/login</td>
+        <td>/users</td>
         <td>POST</td>
-        <td>JSON object; empty fields {name, email,}</td>
+        <td>JSON object</td>
         <td>a JSON object holding data about the user</td>
       </tr>
       <tr>
-        <td>Allow user to update their user info (username)</td>
-        <td>/login/:username</td>
+        <td>Allow user to update their user info</td>
+        <td>/users/:id</td>
         <td>PUT</td>
-        <td>JSON object of users info</td>
+        <td>JSON object</td>
         <td>a text message saying "Update Success!"</td>
       </tr>
       <td>Allow user to deregister</td>
-      <td>/login/:username</td>
+      <td>/users/:id</td>
       <td>DELETE</td>
       <td>None</td>
-      <td>a text message saying "Sad to see you go."</td>
+      <td>Text message: (user.name) has been deleted.</td>
       <tr>
         <td>Allow user to add a movie to their favlist</td>
-        <td>/login/username/:favlist</td>
-        <td>PUT</td>
+        <td>/users/:id/:movieTitle</td>
+        <td>POST</td>
         <td>None</td>
-        <td>a text message saying "Movie Added!"</td>
+        <td>
+          Text message: (movieTitle) has been added to (user.name)'s favorite
+          list!
+        </td>
       </tr>
       <tr>
         <td>Allow user to delete a movie from their favlist</td>
-        <td>/login/username/:favlist</td>
+        <td>/users/:id/:movieTitle</td>
         <td>DELETE</td>
         <td>None</td>
-        <td>a text message saying "Movie Removed!"</td>
+        <td>
+          Text message: (movieTitle) has been removed from (user.name)'s
+          favorite list.
+        </td>
       </tr>
     </table>
   </body>
