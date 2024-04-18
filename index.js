@@ -8,9 +8,13 @@ app.use(bodyParser.json());
 let users = [
   {
     id: "001",
-    username: "Patty",
-    email: "patty@gmail.com",
-    favlist: [],
+    name: "Patty",
+    favoriteMovies: [],
+  },
+  {
+    id: "002",
+    name: "George",
+    favoriteMovies: ["The Notebook"],
   },
 ];
 
@@ -36,6 +40,77 @@ let movies = [
   },
 ];
 
+// We are going to allow a new user to register - POST
+app.post("/users", (req, res) => {
+  let newUser = req.body;
+
+  if (newUser.name) {
+    newUser.id = uuid.v4();
+    users.push(newUser);
+    res.status(201).json(newUser);
+  } else {
+    res.status(400).send("Users need names.");
+  }
+});
+
+// We want to allow users to update info
+app.put("/users/:id", (req, res) => {
+  let { id } = req.params;
+
+  let updatedUser = req.body;
+  let user = users.find((user) => user.id == id);
+
+  if (user) {
+    user.name = updatedUser.name;
+    res.status(200).json(user);
+  } else {
+    res.status(400).send("No such user.");
+  }
+});
+
+// We want to allow users to add a movie to their favorites list
+app.post("/users/:id/:movieTitle", (req, res) => {
+  let { id, movieTitle } = req.params;
+
+  let user = users.find((user) => user.id == id);
+
+  if (user) {
+    user.favoriteMovies.push(movieTitle);
+    res.status(200).send(movieTitle + " has been added to " + user.name +"'s favorite list!");
+  } else {
+    res.status(400).send("No such user.");
+  }
+});
+
+// We want to allow users to remove a movie from their favorites list
+app.delete("/users/:id/:movieTitle", (req, res) => {
+  let { id, movieTitle } = req.params;
+
+  let user = users.find((user) => user.id == id);
+
+  if (user) {
+    user.favoriteMovies = user.favoriteMovies.filter( title => title !== movieTitle);
+    res.status(200).send(movieTitle + " has been removed from " + user.name +"'s favorite list.");
+  } else {
+    res.status(400).send("No such user.");
+  }
+});
+
+// Allow user to deregister
+app.delete("/users/:id", (req, res) => {
+  let { id } = req.params;
+
+  let user = users.find((user) => user.id == id);
+
+  if (user) {
+    users = users.filter( user => user.id != id);
+    res.status(200).send(user.name + " has been deleted.");
+  } else {
+    res.status(400).send("No such user.");
+  }
+});
+
+
 // This is to GET the full list of movies to users
 app.get("/movies", (req, res) => {
   res.status(200).json(movies);
@@ -43,11 +118,11 @@ app.get("/movies", (req, res) => {
 
 // Return data by single movie - title
 app.get("/movies/:Title", (req, res) => {
-  let { title } = req.params;
-  let movie = movies.find((movie) => movie.Title === title);
+  let { Title } = req.params;
+  let movie = movies.find((movie) => movie.Title === Title);
 
   if (movie) {
-    res.status(200).json(movie.Title);
+    res.status(200).json(movie);
   } else {
     res.status(400).send("nope, try again!");
   }
@@ -56,10 +131,12 @@ app.get("/movies/:Title", (req, res) => {
 // Return the data by genre only
 app.get("/movies/genre/:genre", (req, res) => {
   let { genre } = req.params;
-  let movieGenre = movies.find((movie) => movie.Genre === genre);
+  let movieGenre = movies.filter((movie) => movie.Genre === genre);
 
-  if (genre) {
-    res.status(200).json(genre);
+  if (movieGenre.length > 0) {
+    res
+      .status(200)
+      .json(movieGenre[0].Title + "is a(n) " + genre + " type of movie.");
   } else {
     res.status(400).send("nope, not this type of movie.");
   }
@@ -71,7 +148,7 @@ app.get("/movies/main/:mainName", (req, res) => {
   let main = movies.find((movie) => movie.Main.Name === mainName);
 
   if (main) {
-    res.status(200).json(mainName);
+    res.status(200).json(mainName + " stars in " + main.Title);
   } else {
     res.status(400).send("nope, not in these movies.");
   }

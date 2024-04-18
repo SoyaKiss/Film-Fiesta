@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../css/styles.css" />
+    <title>DOCUMENTATION</title>
+  </head>
+  <body>
+    <h1>Film Fiesta</h1>
+    <br />
+    <h3>Movie Endpoints</h3>
+    <table style="width: 100%">
+      <tr class="strongTitle" style="height: 75px">
+        <td>Business Logic</td>
+        <td>URL Endpoint</td>
+        <td>HTTP Method</td>
+        <td>Request Body Data Format</td>
+        <td>Response Body Data Format</td>
+      </tr>
+      <tr>
+        <td>Get a full list of movies</td>
+        <td>/movies</td>
+        <td>GET</td>
+        <td>None</td>
+        <td>a JSON object holding data about all movies in array</td>
+      </tr>
+      <tr>
+        <td>Get the title of the movie</td>
+        <td>/movies/:Title</td>
+        <td>GET</td>
+        <td>None</td>
+        <td>a JSON object holding all the data about the movie</td>
+      </tr>
+        <td>Get the genre of the movie</td>
+        <td>/movies/genre/:genre</td>
+        <td>GET</td>
+        <td>None</td>
+        <td>A string; list of all movies under that genre</td>
+      </tr>
+      <tr>
+        <td>Get the main actor's name</td>
+        <td>/movies/main/:mainName</td>
+        <td>GET</td>
+        <td>None</td>
+        <td>A string; list of all the movies that this actor is the main actor</td>
+      </tr>
+    </table>
+    <br />
+    <br />
+    <h3>User Endpoints</h3>
+    <table style="width: 100%">
+      <tr class="strongTitle" style="height: 75px">
+        <td>Business Logic</td>
+        <td>URL Endpoint</td>
+        <td>HTTP Method</td>
+        <td>Request Body Data Format</td>
+        <td>Response Body Data Format</td>
+      </tr>
+      <tr>
+        <td>Allow new users to register</td>
+        <td>/users</td>
+        <td>POST</td>
+        <td>JSON object</td>
+        <td>a JSON object holding data about the user</td>
+      </tr>
+      <tr>
+        <td>Allow user to update their user info</td>
+        <td>/users/:id</td>
+        <td>PUT</td>
+        <td>JSON object</td>
+        <td>a text message saying "Update Success!"</td>
+      </tr>
+      <td>Allow user to deregister</td>
+      <td>/users/:id</td>
+      <td>DELETE</td>
+      <td>None</td>
+      <td>Text message: (user.name) has been deleted.</td>
+      <tr>
+        <td>Allow user to add a movie to their favlist</td>
+        <td>/users/:id/:movieTitle</td>
+        <td>POST</td>
+        <td>None</td>
+        <td>Text message: (movieTitle) has been added to (user.name)'s favorite list!</td>
+      </tr>
+      <tr>
+        <td>Allow user to delete a movie from their favlist</td>
+        <td>/users/:id/:movieTitle</td>
+        <td>DELETE</td>
+        <td>None</td>
+        <td>Text message: (movieTitle) has been removed from (user.name)'s favorite list.</td>
+      </tr>
+    </table>
+  </body>
+</html>
