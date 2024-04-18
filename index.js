@@ -53,6 +53,86 @@ app.post("/users", (req, res) => {
   }
 });
 
+// We want to allow users to update info
+app.put("/users/:id", (req, res) => {
+  let { id } = req.params;
+
+  let updatedUser = req.body;
+  let user = users.find((user) => user.id == id);
+
+  if (user) {
+    user.name = updatedUser.name;
+    res.status(200).json(user);
+  } else {
+    res.status(400).send("No such user.");
+  }
+});
+
+// We want to allow users to add a movie to their favorites list
+app.post("/users/:id/:movieTitle", (req, res) => {
+  let { id, movieTitle } = req.params;
+
+  let user = users.find((user) => user.id == id);
+
+  if (user) {
+    user.favoriteMovies.push(movieTitle);
+    res
+      .status(200)
+      .send(
+        movieTitle + " has been added to " + user.name + "'s favorite list!"
+      );
+  } else {
+    res.status(400).send("No such user.");
+  }
+});
+
+// We want to allow users to remove a movie from their favorites list
+app.delete("/users/:id/:movieTitle", (req, res) => {
+  let { id, movieTitle } = req.params;
+
+  let user = users.find((user) => user.id == id);
+
+  if (user) {
+    user.favoriteMovies = user.favoriteMovies.filter(
+      (title) => title !== movieTitle
+    );
+    res
+      .status(200)
+      .send(
+        movieTitle + " has been removed from " + user.name + "'s favorite list."
+      );
+  } else {
+    res.status(400).send("No such user.");
+  }
+});
+
+// Allow user to deregister
+app.delete("/users/:id", (req, res) => {
+  let { id } = req.params;
+
+  let user = users.find((user) => user.id == id);
+
+  if (user) {
+    users = users.filter((user) => user.id != id);
+    res.status(200).send(user.name + " has been deleted.");
+  } else {
+    res.status(400).send("No such user.");
+  }
+});
+
+// We are going to allow a new user to register - POST
+app.post("/users", (req, res) => {
+  let newUser = req.body;
+
+  if (newUser.name) {
+    newUser.id = uuid.v4();
+    users.push(newUser);
+    res.status(201).json(newUser);
+  } else {
+    res.status(400).send("Users need names.");
+  }
+});
+
 // We want to allow users to update info - PUT
 app.put("/users/:id", (req, res) => {
   let { id } = req.params;
