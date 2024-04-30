@@ -8,7 +8,7 @@ let Movies = Models.Movie;
 let Users = Models.User;
 
 mongoose
-  .connect("mongodb://localhost:27017/film-fiestaDB", {
+  .connect("mongodb://localhost:27017/[film-fiestaDB]", {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
@@ -20,11 +20,13 @@ mongoose
   });
 app.use(bodyParser.json());
 
-app.get("/test", (req, res) => {
-  if (mongoose.connection.readyState === 1) {
-    res.send("MongoDB connected!");
-  } else {
-    res.status(500).send("MongoDB connection failed!");
+app.get("/Users", async (req, res) => {
+  try {
+    const users = await Users.find();
+    res.status(200).json(users);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error");
   }
 });
 
@@ -57,12 +59,14 @@ app.post("/Users", async (req, res) => {
 });
 
 // PUT Endpoint to update a user:
-app.put("/Users/:id", async (req, res) => {
+app.put("/Users/:Username", async (req, res) => {
   try {
-    const { id } = req.params;
+    const { Username } = req.params;
     const updatedUser = req.body;
 
-    const user = await Users.findByIdAndUpdate(id, updatedUser, { new: true });
+    const user = await Users.findOneAndUpdate({ Username }, updatedUser, {
+      new: true,
+    });
 
     if (user) {
       res.status(200).json(user);
@@ -76,25 +80,28 @@ app.put("/Users/:id", async (req, res) => {
 });
 
 // We want to allow users to add a movie to their favorites list
-app.post("/Users/:id/:movieTitle", async (req, res) => {
+app.post("/Users/:Username/:movieTitle", async (req, res) => {
   try {
-    const { id, movieTitle } = req.params;
+    const { Username, movieTitle } = req.params;
+    console.log("Username:", Username);
+    console.log("movieTitle:", movieTitle);
 
-    const user = await Users.findById(id);
+    const user = await Users.findOne({ Username });
+    console.log("User:", user);
 
     if (user) {
-      user.favoriteMovies.push(movieTitle);
+      const ObjectId = mongoose.Types.ObjectId;
+      const movieObjectId = new ObjectId();
+
+      user.favoriteMovies.push(movieObjectId);
       await user.save();
       res
         .status(200)
         .send(
-          movieTitle +
-            " has been added to " +
-            user.Username +
-            "'s favorite list!"
+          `${movieTitle} has been added to ${user.Username}'s favorite list!`
         );
     } else {
-      res.status(400).send("No such user. You can not add any movies yet.");
+      res.status(400).send("No such user. You cannot add any movies yet.");
     }
   } catch (error) {
     console.error(error);
@@ -103,24 +110,27 @@ app.post("/Users/:id/:movieTitle", async (req, res) => {
 });
 
 // We want to allow users to remove a movie from their favorites list
-app.delete("/Users/:id/:movieTitle", async (req, res) => {
+app.delete("/Users/:Username/:movieTitle", async (req, res) => {
   try {
-    const { id, movieTitle } = req.params;
+    const { Username, movieTitle } = req.params;
 
-    const user = await Users.findById(id);
+    const user = await Users.findOne({ Username });
 
     if (user) {
+      // Convert movieTitle to ObjectId
+      const ObjectId = mongoose.Types.ObjectId;
+      const movieObjectId = new ObjectId();
+
+      // Filter out the movie with the given title
       user.favoriteMovies = user.favoriteMovies.filter(
-        (title) => title !== movieTitle
+        (movie) => !movie.equals(movieObjectId)
       );
+
       await user.save();
       res
         .status(200)
         .send(
-          movieTitle +
-            " has been removed from " +
-            user.Username +
-            "'s favorite list."
+          `${movieTitle} has been removed from ${user.Username}'s favorite list.`
         );
     } else {
       res.status(400).send("No such user.");
@@ -132,134 +142,15 @@ app.delete("/Users/:id/:movieTitle", async (req, res) => {
 });
 
 // Allow user to deregister
-app.delete("/Users/:id", async (req, res) => {
+app.delete("/Users/:Username", async (req, res) => {
   try {
-    const { id } = req.params;
-    const user = await Users.findByIdAndDelete(id);
+    const { Username } = req.params;
+    const user = await Users.findOneAndDelete({ Username });
 
     if (user) {
-      res.status(200).send(user.Username + " has been deleted.");
+      res.status(200).send(`${user.Username} has been deleted.`);
     } else {
-      res.status(400).send("No such user.");
-    }
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Internal Server Error");
-  }
-});
-
-// We are going to allow a new user to register - POST
-app.post("/Users", async (req, res) => {
-  try {
-    const newUser = req.body;
-
-    if (
-      !newUser.Username ||
-      !newUser.Email ||
-      !newUser.fullName ||
-      !newUser.birthday
-    ) {
-      return res.status(400).send("All fields are required.");
-    }
-
-    const existingUser = await Users.findOne({ Username: newUser.Username });
-
-    if (existingUser) {
-      return res.status(400).send(newUser.Username + " already exists.");
-    }
-
-    const user = await Users.create(newUser);
-    res.status(201).json(user);
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Internal Server Error");
-  }
-});
-
-// We want to allow users to update info - PUT
-app.put("/Users/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const updatedUser = req.body;
-
-    const user = await Users.findByIdAndUpdate(id, updatedUser, { new: true });
-
-    if (user) {
-      res.status(200).json(user);
-    } else {
-      res.status(400).send("No such user.");
-    }
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Internal Server Error");
-  }
-});
-
-// We want to allow users to add a movie to their favorites list - POST
-app.post("/Users/:id/:movieTitle", async (req, res) => {
-  try {
-    const { id, movieTitle } = req.params;
-
-    const user = await Users.findById(id);
-
-    if (!user) {
-      return res.status(400).send("No such user.");
-    }
-
-    user.favoriteMovies.push(movieTitle);
-    await user.save();
-
-    res
-      .status(200)
-      .send(
-        movieTitle + " has been added to " + user.Username + "'s favorite list!"
-      );
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Internal Server Error");
-  }
-});
-
-// We want to allow users to remove a movie from their favorites list - DELETE
-app.delete("/Users/:id/:movieTitle", async (req, res) => {
-  try {
-    const { id, movieTitle } = req.params;
-
-    const user = await Users.findById(id);
-
-    if (!user) {
-      return res.status(400).send("No such user.");
-    }
-
-    user.favoriteMovies = user.favoriteMovies.filter(
-      (title) => title !== movieTitle
-    );
-    await user.save();
-
-    res
-      .status(200)
-      .send(
-        movieTitle +
-          " has been removed from " +
-          user.Username +
-          "'s favorite list."
-      );
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Internal Server Error");
-  }
-});
-
-// Allow user to deregister - DELETE
-app.delete("/Users/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const user = await Users.findByIdAndDelete(id);
-
-    if (user) {
-      res.status(200).send(user.Username + " has been deleted.");
-    } else {
-      res.status(400).send("No such user.");
+      res.status(404).send("User not found.");
     }
   } catch (error) {
     console.error(error);
@@ -295,24 +186,24 @@ app.get("/Movies/:Title", async (req, res) => {
 });
 
 // Return the data by genre only
-app.get("/Movies/Genre/:Name", async (req, res) => {
+app.get("/Movies/Genre/:genre", async (req, res) => {
   try {
     const { genre } = req.params;
-    const movieGenre = await Movies.findOne({ "Genre.Name": genre });
+    const moviesWithGenre = await Movies.find({ "Genre.Name": genre });
 
-    if (movieGenre) {
-      res
-        .status(200)
-        .json(movieGenre.Title + " is a(n) " + genre + " type of movie.");
+    if (moviesWithGenre.length > 0) {
+      const movieTitles = moviesWithGenre
+        .map((movie) => movie.Title)
+        .join(", ");
+      res.status(200).send(`"${movieTitles}" are "${genre}" type movies.`);
     } else {
-      res.status(400).send("No such genre found.");
+      res.status(400).send(`No movies found with '${genre}' genre.`);
     }
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal Server Error");
   }
 });
-
 // Return the data by Main Actor
 app.get("/Movies/mainActor/:Name", async (req, res) => {
   try {
@@ -338,6 +229,65 @@ app.get("/Movies/mainActor/:Name", async (req, res) => {
   }
 });
 
+app.get("/Movies/supportingActor/:Name", async (req, res) => {
+  try {
+    const { Name } = req.params;
+    const supportingActorMovies = await Movies.find({
+      "supportingActor.Name": Name,
+    });
+
+    if (supportingActorMovies.length > 0) {
+      res
+        .status(200)
+        .json(
+          Name +
+            " is the supporting actor in " +
+            supportingActorMovies.map((movie) => movie.Title).join(", ")
+        );
+    } else {
+      res
+        .status(400)
+        .send("No movies found with " + Name + " as the supporting actor.");
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+app.get("/Movies/:Title/Description", async (req, res) => {
+  try {
+    const { Title } = req.params;
+    const movie = await Movies.findOne({ Title });
+
+    if (movie) {
+      const description = movie.Description;
+      res.status(200).send(description);
+    } else {
+      res.status(404).send("Movie not found.");
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+app.get("/Movies/ImageURL/:movieTitle", async (req, res) => {
+  try {
+    const { movieTitle } = req.params;
+    const movie = await Movies.findOne({ Title: movieTitle });
+
+    if (movie) {
+      res.status(200).json(movie.ImageURL);
+    } else {
+      res.status(404).send("Movie not found.");
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
 app.listen(8080, () => {
-  console.log("This is just not working for me.");
+  console.log("This is finally working for me.");
 });
