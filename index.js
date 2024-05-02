@@ -7,14 +7,12 @@ let app = express();
 let Movies = Models.Movie;
 let Users = Models.User;
 
-// mongoose
-//   .connect("mongodb://localhost:27017/[film-fiestaDB]", {
-//     useNewUrlParser: true,
-//     useUnifiedTopology: true,
-//   })
-
 mongoose
+<<<<<<< HEAD
   .connect(process.env.CONNECTION_URI, {
+=======
+  .connect("mongodb://localhost:27017/[film-fiestaDB]", {
+>>>>>>> parent of 3aaf15f (Data Security, DB on MongoDB Atlas, hosting on Heroku)
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
@@ -25,13 +23,9 @@ mongoose
     console.error("MongoDB connection error:", error);
   });
 app.use(bodyParser.json());
-let cors = require("cors");
-app.use(cors());
-
 let auth = require("./auth.js")(app);
 let passport = require("passport");
 require("./passport.js");
-let { check, validationResult } = require("express-validator");
 
 // GET the list of all users currently in Users database collection
 app.get("/Users", async (req, res) => {
@@ -45,50 +39,33 @@ app.get("/Users", async (req, res) => {
 });
 
 // POST endpoint to create a user:
-app.post(
-  "/Users",
-  [
-    check("Username", "Username is required").isLength({ min: 5 }),
-    check(
-      "Username",
-      "Username contains non alphanumeric characters - not allowed."
-    ).isAlphanumeric(),
-    check("Password", "Password is required").not().isEmpty(),
-    check("Email", "Email does not appear to be valid").isEmail(),
-  ],
-  async (req, res) => {
-    let errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(422).json({ errors: errors.array() });
-    }
-    let hashedPassword = Users.hashedPassword(req.body.Password);
-    await Users.findOne({ Username: req.body.Username })
-      .then((user) => {
-        if (user) {
-          return res.status(400).send(req.body.Username + " already exists");
-        } else {
-          Users.create({
-            Username: req.body.Username,
-            Password: req.body.Password,
-            Email: req.body.Email,
-            fullName: req.body.fullName,
-            birthday: req.body.birthday,
+app.post("/Users", async (req, res) => {
+  await Users.findOne({ Username: req.body.Username })
+    .then((user) => {
+      if (user) {
+        return res.status(400).send(req.body.Username + "already exists");
+      } else {
+        Users.create({
+          Username: req.body.Username,
+          Password: req.body.Password,
+          Email: req.body.Email,
+          fullName: req.body.fullName,
+          birthday: req.body.birthday,
+        })
+          .then((user) => {
+            res.status(201).json(user);
           })
-            .then((user) => {
-              res.status(201).json(user);
-            })
-            .catch((error) => {
-              console.error(error);
-              res.status(500).send("Error: " + error);
-            });
-        }
-      })
-      .catch((error) => {
-        console.error(error);
-        res.status(500).send("Error: " + error);
-      });
-  }
-);
+          .catch((error) => {
+            console.error(error);
+            res.status(500).send("Error: " + error);
+          });
+      }
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(500).send("Error: " + error);
+    });
+});
 
 // PUT Endpoint to update a user:
 app.put(
@@ -368,7 +345,6 @@ app.get(
   }
 );
 
-let port = process.env.PORT || 8080;
-app.listen(port, "0.0.0.0", () => {
-  console.log("Listening on Port " + port);
+app.listen(8080, () => {
+  console.log("This is finally working for me.");
 });
