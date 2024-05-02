@@ -14,7 +14,7 @@ let Users = Models.User;
 //   })
 
 mongoose
-  .connect(process.env.CONNECTION_URI, {
+  .connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
@@ -24,6 +24,15 @@ mongoose
   .catch((error) => {
     console.error("MongoDB connection error:", error);
   });
+
+const db = mongoose.connection;
+db.once("open", () => {
+  console.log("MongoDB connected successfully");
+});
+db.on("error", (err) => {
+  console.error("MongoDB connection error:", err);
+});
+
 app.use(bodyParser.json());
 let cors = require("cors");
 app.use(cors());
