@@ -11,7 +11,11 @@ mongoose
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   .connect(process.env.CONNECTION_URI, {
+=======
+  .connect("mongodb://localhost:27017/[film-fiestaDB]", {
+>>>>>>> parent of 3aaf15f (Data Security, DB on MongoDB Atlas, hosting on Heroku)
 =======
   .connect("mongodb://localhost:27017/[film-fiestaDB]", {
 >>>>>>> parent of 3aaf15f (Data Security, DB on MongoDB Atlas, hosting on Heroku)
