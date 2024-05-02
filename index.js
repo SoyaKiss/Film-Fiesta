@@ -14,13 +14,10 @@ let Users = Models.User;
 //   })
 
 mongoose
-  .connect(
-    " mongodb+srv://SoyaKiss:CakesnPaige2018@film-fiestadb.pxptm7a.mongodb.net/film-fiestaDB?retryWrites=true&w=majority&appName=film-fiestaDB ",
-    {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    }
-  )
+  .connect(process.env.CONNECTION_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then(() => {
     console.log("MongoDB connected successfully");
   })
