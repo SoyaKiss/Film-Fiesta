@@ -82,6 +82,7 @@ app.post(
             Username: req.body.Username,
             Password: hashedPassword,
             Email: req.body.Email,
+            fullName: req.body.fullName,
             Birthday: req.body.Birthday,
           })
             .then((user) => {
