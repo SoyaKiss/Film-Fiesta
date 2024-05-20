@@ -225,7 +225,7 @@ app.delete(
 // This is to GET the full list of movies to users - GET
 app.get(
   "/movies",
-  // passport.authenticate("jwt", { session: false }),
+  passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     await Movies.find()
       .then((movies) => {
