@@ -141,29 +141,30 @@ app.post(
       console.log("Username:", Username);
       console.log("movieTitle:", movieTitle);
 
-      const user = await Users.findOne({ Username });
-      console.log("User:", user);
+      const movie = await Movies.findOne({Title: movieTitle});
 
-      if (user) {
-        const ObjectId = mongoose.Types.ObjectId;
-        const movieObjectId = new ObjectId();
-
-        user.favoriteMovies.push(movieObjectId);
-        await user.save();
-        res
-          .status(200)
-          .send(
-            `${movieTitle} has been added to ${user.Username}'s favorite list!`
-          );
-      } else {
-        res.status(400).send("No such user. You cannot add any movies yet.");
+      if (!movie) {
+        res.status(400).send({message: "No such movie"})
       }
+
+        await Users.findOneAndUpdate(
+          { Username },
+          {
+            $push: { favoriteMovies: movie._id },
+          },
+          { new: true },
+          ).then((updatedUser) => {
+          res.json(updatedUser);
+        }).catch((err) => {
+          console.error(err);
+          res.status(500).send("Error: " + err);
+        });
     } catch (error) {
       console.error(error);
       res.status(500).send("Internal Server Error");
     }
   }
-);
+  );
 
 // We want to allow users to remove a movie from their favorites list
 app.delete(
