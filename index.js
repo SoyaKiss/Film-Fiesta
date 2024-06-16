@@ -166,13 +166,13 @@ app.post(
 
 // DELETE - Remove a movie from the user's favorites
 app.delete(
-  "/Users/:Username/favorites/:movieTitle",
+  "/Users/:Username/favorites/:movieIdToRemove",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     try {
-      const { Username, movieTitle } = req.params;
+      const { Username, movieIdToRemove } = req.params;
 
-      const movie = await Movies.findOne({ Title: movieTitle });
+      const movie = await Movies.findOne({ _id: movieIdToRemove });
 
       if (!movie) {
         return res.status(400).send({ message: "No such movie" });
@@ -180,9 +180,10 @@ app.delete(
 
       await Users.findOneAndUpdate(
         { Username },
-        { $pull: { favoriteMovies: movie._id } },
+        { $pull: { favoriteMovies: movieIdToRemove } }, // Remove by movieIdToRemove instead of movie._id
         { new: true }
       )
+        .populate("favoriteMovies") // Ensure you populate favoriteMovies if necessary
         .then((updatedUser) => {
           res.json(updatedUser);
         })
