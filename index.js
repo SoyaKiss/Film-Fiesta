@@ -131,40 +131,6 @@ app.put(
   }
 );
 
-// OLD CODE --> POST - We want to allow users to add a movie to their favorites list (editing the list)
-// app.post(
-//   "/Users/:Username/:movieTitle",
-//   passport.authenticate("jwt", { session: false }),
-//   async (req, res) => {
-//     try {
-//       const { Username, movieTitle } = req.params;
-//       console.log("Username:", Username);
-//       console.log("movieTitle:", movieTitle);
-
-//       const user = await Users.findOne({ Username });
-//       console.log("User:", user);
-
-//       if (user) {
-//         const ObjectId = mongoose.Types.ObjectId;
-//         const movieObjectId = new ObjectId();
-
-//         user.favoriteMovies.push(movieObjectId);
-//         await user.save();
-//         res
-//           .status(200)
-//           .send(
-//             `${movieTitle} has been added to ${user.Username}'s favorite list!`
-//           );
-//       } else {
-//         res.status(400).send("No such user. You cannot add any movies yet.");
-//       }
-//     } catch (error) {
-//       console.error(error);
-//       res.status(500).send("Internal Server Error");
-//     }
-//   }
-// );
-
 // POST - Add a movie to the user's favorites
 app.post(
   "/Users/:Username/favorites/:movieTitle",
@@ -198,51 +164,15 @@ app.post(
   }
 );
 
-// OLD CODE --> We want to allow users to remove a movie from their favorites list
-// app.delete(
-//   "/Users/:Username/:movieTitle",
-//   passport.authenticate("jwt", { session: false }),
-//   async (req, res) => {
-//     try {
-//       const { Username, movieTitle } = req.params;
-
-//       const user = await Users.findOne({ Username });
-
-//       if (user) {
-//         // Convert movieTitle to ObjectId
-//         const ObjectId = mongoose.Types.ObjectId;
-//         const movieObjectId = new ObjectId();
-
-//         // Filter out the movie with the given title
-//         user.favoriteMovies = user.favoriteMovies.filter(
-//           (movie) => !movie.equals(movieObjectId)
-//         );
-
-//         await user.save();
-//         res
-//           .status(200)
-//           .send(
-//             `${movieTitle} has been removed from ${user.Username}'s favorite list.`
-//           );
-//       } else {
-//         res.status(400).send("No such user.");
-//       }
-//     } catch (error) {
-//       console.error(error);
-//       res.status(500).send("Internal Server Error");
-//     }
-//   }
-// );
-
 // DELETE - Remove a movie from the user's favorites
 app.delete(
-  "/Users/:Username/favorites/:movieTitle",
+  "/Users/:Username/favorites/:movieIdToRemove",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     try {
-      const { Username, movieTitle } = req.params;
+      const { Username, movieIdToRemove } = req.params;
 
-      const movie = await Movies.findOne({ Title: movieTitle });
+      const movie = await Movies.findOne({ _id: movieIdToRemove });
 
       if (!movie) {
         return res.status(400).send({ message: "No such movie" });
@@ -250,9 +180,10 @@ app.delete(
 
       await Users.findOneAndUpdate(
         { Username },
-        { $pull: { favoriteMovies: movie._id } },
+        { $pull: { favoriteMovies: movieIdToRemove } }, // Remove by movieIdToRemove instead of movie._id
         { new: true }
       )
+        .populate("favoriteMovies") // Ensure you populate favoriteMovies if necessary
         .then((updatedUser) => {
           res.json(updatedUser);
         })
