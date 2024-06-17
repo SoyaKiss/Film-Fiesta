@@ -126,6 +126,7 @@ app.put(
 );
 
 // POST endpoint to create a user:
+// POST endpoint to create a user:
 app.post(
   "/users",
   [
@@ -149,7 +150,7 @@ app.post(
       if (user) {
         return res
           .status(400)
-          .send({ message: req.body.Username + " already exists" });
+          .json({ message: req.body.Username + " already exists" });
       }
       const newUser = await Users.create({
         Username: req.body.Username,
@@ -161,7 +162,9 @@ app.post(
       res.status(201).json(newUser);
     } catch (error) {
       console.error(error);
-      res.status(500).send("Error: " + error);
+      res
+        .status(500)
+        .json({ message: "Internal Server Error: " + error.message });
     }
   }
 );
