@@ -7,12 +7,6 @@ let app = express();
 let Movies = Models.Movie;
 let Users = Models.User;
 
-// mongoose
-//   .connect("mongodb://localhost:27017/[film-fiestaDB]", {
-//     useNewUrlParser: true,
-//     useUnifiedTopology: true,
-//   })
-
 mongoose
   .connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
@@ -131,35 +125,46 @@ app.put(
   }
 );
 
-// POST - Add a movie to the user's favorites
+// POST endpoint to create a user:
+// POST endpoint to create a user:
 app.post(
-  "/Users/:Username/favorites/:movieTitle",
-  passport.authenticate("jwt", { session: false }),
+  "/users",
+  [
+    check("Username", "Username is required").isLength({ min: 5 }),
+    check(
+      "Username",
+      "Username contains non-alphanumeric characters - not allowed."
+    ).isAlphanumeric(),
+    check("Password", "Password is required").not().isEmpty(),
+    check("Email", "Email does not appear to be valid").isEmail(),
+  ],
   async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
+
+    const hashedPassword = Users.hashPassword(req.body.Password);
     try {
-      const { Username, movieTitle } = req.params;
-
-      const movie = await Movies.findOne({ Title: movieTitle });
-
-      if (!movie) {
-        return res.status(400).send({ message: "No such movie" });
+      const user = await Users.findOne({ Username: req.body.Username });
+      if (user) {
+        return res
+          .status(400)
+          .json({ message: req.body.Username + " already exists" });
       }
-
-      await Users.findOneAndUpdate(
-        { Username },
-        { $addToSet: { favoriteMovies: movie._id } },
-        { new: true }
-      )
-        .then((updatedUser) => {
-          res.json(updatedUser);
-        })
-        .catch((err) => {
-          console.error(err);
-          res.status(500).send("Error: " + err);
-        });
+      const newUser = await Users.create({
+        Username: req.body.Username,
+        Password: hashedPassword,
+        Email: req.body.Email,
+        FullName: req.body.FullName,
+        Birthday: req.body.Birthday,
+      });
+      res.status(201).json(newUser);
     } catch (error) {
       console.error(error);
-      res.status(500).send("Internal Server Error");
+      res
+        .status(500)
+        .json({ message: "Internal Server Error: " + error.message });
     }
   }
 );
