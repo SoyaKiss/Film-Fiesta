@@ -132,35 +132,58 @@ app.put(
 );
 
 // POST - Add a movie to the user's favorites
+// app.post(
+//   "/Users/:Username/favorites/:movieTitle",
+//   passport.authenticate("jwt", { session: false }),
+//   async (req, res) => {
+//     try {
+//       const { Username, movieTitle } = req.params;
+
+//       const movie = await Movies.findOne({ Title: movieTitle });
+
+//       if (!movie) {
+//         return res.status(400).send({ message: "No such movie" });
+//       }
+
+//       await Users.findOneAndUpdate(
+//         { Username },
+//         { $addToSet: { favoriteMovies: movie._id } },
+//         { new: true }
+//       )
+//         .then((updatedUser) => {
+//           res.json(updatedUser);
+//         })
+//         .catch((err) => {
+//           console.error(err);
+//           res.status(500).send("Error: " + err);
+//         });
+//     } catch (error) {
+//       console.error(error);
+//       res.status(500).send("Internal Server Error");
+//     }
+//   }
+// );
+
 app.post(
-  "/Users/:Username/favorites/:movieTitle",
+  "/Users/:Username/favorites/:movieId",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
-    try {
-      const { Username, movieTitle } = req.params;
-
-      const movie = await Movies.findOne({ Title: movieTitle });
-
-      if (!movie) {
-        return res.status(400).send({ message: "No such movie" });
-      }
-
-      await Users.findOneAndUpdate(
-        { Username },
-        { $addToSet: { favoriteMovies: movie._id } },
-        { new: true }
-      )
-        .then((updatedUser) => {
-          res.json(updatedUser);
-        })
-        .catch((err) => {
-          console.error(err);
-          res.status(500).send("Error: " + err);
-        });
-    } catch (error) {
-      console.error(error);
-      res.status(500).send("Internal Server Error");
+    const { Username, movieId } = req.params;
+    const movie = await Movies.findById(movieId);
+    if (!movie) {
+      return res.status(400).send("Movie not found");
     }
+    await Users.findOneAndUpdate(
+      { Username },
+      { $addToSet: { favoriteMovies: movie._id } },
+      { new: true }
+    )
+      .populate("favoriteMovies")
+      .then((user) => res.json(user))
+      .catch((err) => {
+        console.error(err);
+        res.status(500).send("Error updating favorites: " + err);
+      });
   }
 );
 
