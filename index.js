@@ -116,50 +116,6 @@ app.put(
   }
 );
 
-// POST endpoint to create a user:
-// POST endpoint to create a user:
-app.post(
-  "/users",
-  [
-    check("Username", "Username is required").isLength({ min: 5 }),
-    check(
-      "Username",
-      "Username contains non-alphanumeric characters - not allowed."
-    ).isAlphanumeric(),
-    check("Password", "Password is required").not().isEmpty(),
-    check("Email", "Email does not appear to be valid").isEmail(),
-  ],
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(422).json({ errors: errors.array() });
-    }
-
-    const hashedPassword = Users.hashPassword(req.body.Password);
-    try {
-      const user = await Users.findOne({ Username: req.body.Username });
-      if (user) {
-        return res
-          .status(400)
-          .json({ message: req.body.Username + " already exists" });
-      }
-      const newUser = await Users.create({
-        Username: req.body.Username,
-        Password: hashedPassword,
-        Email: req.body.Email,
-        FullName: req.body.FullName,
-        Birthday: req.body.Birthday,
-      });
-      res.status(201).json(newUser);
-    } catch (error) {
-      console.error(error);
-      res
-        .status(500)
-        .json({ message: "Internal Server Error: " + error.message });
-    }
-  }
-);
-
 // DELETE - Remove a movie from the user's favorites
 app.delete(
   "/Users/:Username/favorites/:movieIdToRemove",
