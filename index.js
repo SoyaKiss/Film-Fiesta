@@ -503,7 +503,7 @@ app.post(
       });
 
     } catch (error) {
-      console.error(error);
+      console.error('Error createing user:', error);
       res.status(500).json({ message: 'Internal Server Error: ' + error.message });
     }
   }
@@ -517,7 +517,7 @@ app.get(
       const movies = await Movies.find();
       res.status(200).json(movies);
     } catch (error) {
-      console.error(error);
+      console.error('Error fetching movies:', error);
       res.status(500).send('Internal Server Error');
     }
   }
