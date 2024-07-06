@@ -520,6 +520,37 @@ app.get(
   }
 );
 
+app.post('/login', async (req, res) => {
+  const { Username, Password } = req.body;
+  try {
+    const user = await Users.findOne({ Username });
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid username or password' });
+    }
+
+    const isValidPassword = await bcrypt.compare(Password, user.Password);
+    if (!isValidPassword) {
+      return res.status(400).json({ message: 'Invalid username or password' });
+    }
+
+    const token = jwt.sign({ id: user._id, username: user.Username }, secretKey, { expiresIn: '1h' });
+
+    res.status(200).json({
+      user: {
+        _id: user._id,
+        Username: user.Username,
+        Email: user.Email,
+        fullName: user.fullName,
+        favoriteMovies: user.favoriteMovies,
+      },
+      token,
+    });
+  } catch (error) {
+    console.error('Error during login:', error);
+    res.status(500).json({ message: 'Internal Server Error: ' + error.message });
+  }
+});
+
 const port = process.env.PORT || 8080;
 app.listen(port, '0.0.0.0', () => {
   console.log('Listening on Port ' + port);
