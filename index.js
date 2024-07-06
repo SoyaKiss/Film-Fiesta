@@ -36,6 +36,65 @@ let passport = require("passport");
 require("./passport.js");
 let { check, validationResult } = require("express-validator");
 
+// JWT and Token handling
+const jwt = require('jsonwebtoken');
+const secretKey = 'your_secret_key';
+const refreshTokenSecret = 'your_refresh_token_secret';
+const tokenExpiration = '1h';
+const refreshTokenExpiration = '7d';
+
+let refreshTokens = [];
+
+// Function to generate tokens
+const generateTokens = (user) => {
+  const accessToken = jwt.sign(user, secretKey, { expiresIn: tokenExpiration });
+  const refreshToken = jwt.sign(user, refreshTokenSecret, { expiresIn: refreshTokenExpiration });
+  return { accessToken, refreshToken };
+};
+  
+// Login endpoint
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+  try {
+    const user = await Users.findOne({ Username: username });
+    if (!user) {
+      return res.status(400).send('Invalid username or password');
+    }
+
+    const isValidPassword = await user.validatePassword(password);
+    if (!isValidPassword) {
+      return res.status(400).send('Invalid username or password');
+    }
+
+    const tokens = generateTokens({ id: user._id, username: user.Username });
+    refreshTokens.push(tokens.refreshToken);
+    res.json(tokens);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+// Refresh token endpoint
+app.post('/token', (req, res) => {
+  const { token } = req.body;
+  if (!token) {
+    return res.status(401).send('Unauthorized');
+  }
+  if (!refreshTokens.includes(token)) {
+    return res.status(403).send('Forbidden');
+  }
+  jwt.verify(token, refreshTokenSecret, (err, user) => {
+    if (err) {
+      return res.status(403).send('Forbidden');
+    }
+    const newTokens = generateTokens({ id: user.id, username: user.username });
+    refreshTokens = refreshTokens.filter(t => t !== token);
+    refreshTokens.push(newTokens.refreshToken);
+    res.json(newTokens);
+  });
+});
+
 // GET the list of all users currently in Users database collection
 app.get("/Users", async (req, res) => {
   try {
