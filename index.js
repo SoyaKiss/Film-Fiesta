@@ -124,7 +124,7 @@ app.post(
       return res.status(422).json({ errors: errors.array() });
     }
 
-    const hashedPassword = Users.hashPassword(req.body.Password);
+    const hashedPassword = await bcrypt.hash(req.body.Password, 10);
     try {
       const user = await Users.findOne({ Username: req.body.Username });
       if (user) {
@@ -138,14 +138,15 @@ app.post(
         Birthday: req.body.Birthday,
       });
 
-    // Generate a token
-      const token = jwt.sign({ id: newUser._id, username: newUser.Username }, secretKey, {expiresIn: "1hr" });
+      // Generate a token
+      const token = jwt.sign({ id: newUser._id, username: newUser.Username }, secretKey, { expiresIn: "1h" });
 
-    // Return the user and token in the response
+      // Return the user and token in the response
       res.status(201).json({
         user: newUser,
         token,
       });
+
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: "Internal Server Error: " + error.message });
