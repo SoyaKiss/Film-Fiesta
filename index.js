@@ -2,6 +2,8 @@ let express = require("express");
 let bodyParser = require("body-parser");
 let mongoose = require("mongoose");
 let Models = require("./models.js");
+let bcrypt = require("bcrypt");
+let { check, validationResults } = require ("express-validator");
 
 let app = express();
 let Movies = Models.Movie;
@@ -34,7 +36,6 @@ app.use(cors());
 let auth = require("./auth.js")(app);
 let passport = require("passport");
 require("./passport.js");
-let { check, validationResult } = require("express-validator");
 
 // JWT and Token handling
 const jwt = require('jsonwebtoken');
@@ -134,7 +135,7 @@ app.post(
         Username: req.body.Username,
         Password: hashedPassword,
         Email: req.body.Email,
-        fullName: req.body.fullName,  // Make sure fullName is provided
+        fullName: req.body.fullName,
         Birthday: req.body.Birthday,
       });
 
