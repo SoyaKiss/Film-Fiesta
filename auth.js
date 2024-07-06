@@ -46,12 +46,17 @@ const jwtOptions = {
 };
 
 passport.use(
-  new JwtStrategy(jwtOptions, (jwt_payload, done) => {
-    Users.findById(jwt_payload.id, (err, user) => {
-      if (err) return done(err, false);
-      if (user) return done(null, user);
-      return done(null, false);
-    });
+  new JwtStrategy(jwtOptions, async (jwt_payload, done) => {
+    try {
+      const user = await Users.findById(jwt_payload.id).exec();
+      if (user) {
+        return done(null, user);
+      } else {
+        return done(null, false);
+      }
+    } catch (err) {
+      return done(err, false);
+    }
   })
 );
 
