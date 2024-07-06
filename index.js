@@ -2,6 +2,8 @@ let express = require("express");
 let bodyParser = require("body-parser");
 let mongoose = require("mongoose");
 let Models = require("./models.js");
+let bcrypt = require("bcrypt");
+let { check, validationResult } = require("express-validator");
 
 let app = express();
 let Movies = Models.Movie;
@@ -34,7 +36,6 @@ app.use(cors());
 let auth = require("./auth.js")(app);
 let passport = require("passport");
 require("./passport.js");
-let { check, validationResult } = require("express-validator");
 
 // JWT and Token handling
 const jwt = require('jsonwebtoken');
@@ -124,7 +125,7 @@ app.post(
       return res.status(422).json({ errors: errors.array() });
     }
 
-    const hashedPassword = Users.hashPassword(req.body.Password);
+    const hashedPassword = await bcrypt.hash(req.body.Password, 10);
     try {
       const user = await Users.findOne({ Username: req.body.Username });
       if (user) {
@@ -134,10 +135,19 @@ app.post(
         Username: req.body.Username,
         Password: hashedPassword,
         Email: req.body.Email,
-        fullName: req.body.fullName,  // Make sure fullName is provided
+        fullName: req.body.fullName,
         Birthday: req.body.Birthday,
       });
-      res.status(201).json(newUser);
+
+      // Generate a token
+      const token = jwt.sign({ id: newUser._id, username: newUser.Username }, secretKey, { expiresIn: "1h" });
+
+      // Return the user and token in the response
+      res.status(201).json({
+        user: newUser,
+        token,
+      });
+
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: "Internal Server Error: " + error.message });
