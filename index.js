@@ -137,7 +137,15 @@ app.post(
         fullName: req.body.fullName,  // Make sure fullName is provided
         Birthday: req.body.Birthday,
       });
-      res.status(201).json(newUser);
+
+    // Generate a token
+      const token = jwt.sign({ id: newUser._id, username: newUser.Username }, secretKey, {expiresIn: "1hr" });
+
+    // Return the user and token in the response
+      res.status(201).json({
+        user: newUser,
+        token,
+      });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: "Internal Server Error: " + error.message });
