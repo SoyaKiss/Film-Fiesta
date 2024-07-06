@@ -143,8 +143,9 @@ app.post(
       const token = jwt.sign({ id: newUser._id, username: newUser.Username }, secretKey, { expiresIn: "1h" });
 
       // Return the user and token in the response
+      const { _id, Username, Email, fullName, favoriteMovies } = newUser;
       res.status(201).json({
-        user: newUser,
+        user: { _id, Username, Email, fullName, favoriteMovies },
         token,
       });
 
