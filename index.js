@@ -4,6 +4,7 @@ let mongoose = require("mongoose");
 let Models = require("./models.js");
 let bcrypt = require("bcrypt");
 let { check, validationResult } = require("express-validator");
+let jwt = require('jsonwebtoken');
 
 let app = express();
 let Movies = Models.Movie;
@@ -38,7 +39,6 @@ let passport = require("passport");
 require("./passport.js");
 
 // JWT and Token handling
-const jwt = require('jsonwebtoken');
 const secretKey = 'your_secret_key';
 const refreshTokenSecret = 'your_refresh_token_secret';
 const tokenExpiration = '1h';
@@ -107,15 +107,12 @@ app.get("/Users", async (req, res) => {
   }
 });
 
-// POST endpoint to create a user:
+// POST endpoint to create a new user:
 app.post(
   "/users",
   [
     check("Username", "Username is required").isLength({ min: 5 }),
-    check(
-      "Username",
-      "Username contains non alphanumeric characters - not allowed."
-    ).isAlphanumeric(),
+    check("Username", "Username contains non alphanumeric characters - not allowed.").isAlphanumeric(),
     check("Password", "Password is required").not().isEmpty(),
     check("Email", "Email does not appear to be valid").isEmail(),
   ],
@@ -127,9 +124,9 @@ app.post(
 
     const hashedPassword = await bcrypt.hash(req.body.Password, 10);
     try {
-      const user = await Users.findOne({ Username: req.body.Username });
-      if (user) {
-        return res.status(400).json({ message: req.body.Username + " already exists" });
+      const existingUser = await Users.findOne({ Username: req.body.Username });
+      if (existingUser) {
+        return res.status(400).json({ message: `${req.body.Username} already exists` });
       }
       const newUser = await Users.create({
         Username: req.body.Username,
@@ -140,12 +137,17 @@ app.post(
       });
 
       // Generate a token
-      const token = jwt.sign({ id: newUser._id, username: newUser.Username }, secretKey, { expiresIn: "1h" });
+      const token = jwt.sign({ id: newUser._id, username: newUser.Username }, secretKey, { expiresIn: '1h' });
 
       // Return the user and token in the response
-      const { _id, Username, Email, fullName, favoriteMovies } = newUser;
       res.status(201).json({
-        user: { _id, Username, Email, fullName, favoriteMovies },
+        user: {
+          _id: newUser._id,
+          Username: newUser.Username,
+          Email: newUser.Email,
+          fullName: newUser.fullName,
+          favoriteMovies: newUser.favoriteMovies,
+        },
         token,
       });
 
