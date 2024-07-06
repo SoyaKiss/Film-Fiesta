@@ -443,10 +443,7 @@ const Users = Models.User;
 const secretKey = 'your_secret_key';
 
 mongoose
-  .connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(process.env.MONGODB_URI)
   .then(() => {
     console.log('MongoDB connected successfully');
   })
@@ -503,7 +500,7 @@ app.post(
       });
 
     } catch (error) {
-      console.error('Error createing user:', error);
+      console.error('Error creating user:', error);
       res.status(500).json({ message: 'Internal Server Error: ' + error.message });
     }
   }
@@ -518,7 +515,7 @@ app.get(
       res.status(200).json(movies);
     } catch (error) {
       console.error('Error fetching movies:', error);
-      res.status(500).send('Internal Server Error');
+      res.status(500).send('Internal Server Error: ' + error.message);
     }
   }
 );
