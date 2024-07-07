@@ -25,7 +25,7 @@ mongoose
 app.use(bodyParser.json());
 
 const cors = require('cors');
-let allowedOrigins = ['http://localhost:8080', 'http://testsite.com', 'http://localhost:1234', 'https://film-fiesta-marvel-movies.netlify.app'];;
+let allowedOrigins = ['http://localhost:8080', 'http://localhost:1234', 'https://film-fiesta-marvel-movies.netlify.app'];
 
 app.use(cors({
   origin: (origin, callback) => {
