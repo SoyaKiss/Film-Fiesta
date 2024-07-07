@@ -597,6 +597,27 @@ app.put(
   }
 );
 
+// Allow user to deregister
+app.delete(
+  "/Users/:Username",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    try {
+      const { Username } = req.params;
+      const user = await Users.findOneAndDelete({ Username });
+
+      if (user) {
+        res.status(200).send(`${user.Username} has been deleted.`);
+      } else {
+        res.status(404).send("User not found.");
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(500).send("Internal Server Error");
+    }
+  }
+);
+
 const port = process.env.PORT || 8080;
 app.listen(port, '0.0.0.0', () => {
   console.log('Listening on Port ' + port);
