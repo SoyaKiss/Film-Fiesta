@@ -558,32 +558,47 @@ app.put(
     if (req.user.Username !== req.params.Username) {
       return res.status(400).send("Permission denied");
     }
-    await Users.findOneAndUpdate(
-      { Username: req.params.Username },
-      {
-        $set: {
-          Username: req.body.Username,
-          Password: req.body.Password,
-          Email: req.body.Email,
-          Birthday: req.body.Birthday,
+
+    const updates = {
+      Username: req.body.Username,
+      Email: req.body.Email,
+      fullName: req.body.fullName,
+      Birthday: req.body.Birthday,
+    };
+
+    // Only hash the password if it's being updated
+    if (req.body.Password) {
+      updates.Password = await bcrypt.hash(req.body.Password, 10);
+    }
+
+    try {
+      const updatedUser = await Users.findOneAndUpdate(
+        { Username: req.params.Username },
+        { $set: updates },
+        { new: true }
+      );
+
+      const token = jwt.sign({ id: updatedUser._id, username: updatedUser.Username }, secretKey, { expiresIn: '1h' });
+
+      res.status(200).json({
+        user: {
+          _id: updatedUser._id,
+          Username: updatedUser.Username,
+          Email: updatedUser.Email,
+          fullName: updatedUser.fullName,
+          favoriteMovies: updatedUser.favoriteMovies,
         },
-      },
-      { new: true }
-    )
-      .then((updatedUser) => {
-        res.json(updatedUser);
-      })
-      .catch((err) => {
-        console.log(err);
-        res.status(500).send("Error: " + err);
+        token,
       });
+    } catch (err) {
+      console.log(err);
+      res.status(500).send("Error: " + err);
+    }
   }
 );
-
 
 const port = process.env.PORT || 8080;
 app.listen(port, '0.0.0.0', () => {
   console.log('Listening on Port ' + port);
 });
-
 
