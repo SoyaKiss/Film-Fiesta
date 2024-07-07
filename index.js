@@ -458,6 +458,7 @@ app.use(cors());
 
 require('./auth.js')(app);
 
+// POST - Create new user
 app.post(
   '/users',
   [
@@ -506,6 +507,7 @@ app.post(
   }
 );
 
+// GET: Get a list of movies
 app.get(
   '/movies',
   passport.authenticate('jwt', { session: false }),
@@ -551,6 +553,7 @@ app.post('/login', async (req, res) => {
   }
 });
 
+// PUT - Update User Info
 app.put(
   "/users/:Username",
   passport.authenticate("jwt", { session: false }),
@@ -597,7 +600,7 @@ app.put(
   }
 );
 
-// Allow user to deregister
+// DELETE - Allow user to deregister
 app.delete(
   "/Users/:Username",
   passport.authenticate("jwt", { session: false }),
@@ -617,6 +620,57 @@ app.delete(
     }
   }
 );
+
+// POST - Add a movie to the user's favorites
+app.post(
+  "/Users/:Username/favorites/:MovieID",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    try {
+      const { Username, MovieID } = req.params;
+      const user = await Users.findOneAndUpdate(
+        { Username },
+        { $addToSet: { favoriteMovies: MovieID } },
+        { new: true }
+      );
+
+      if (!user) {
+        return res.status(400).send("User does not exist.");
+      }
+
+      res.json(user);
+    } catch (error) {
+      console.error(error);
+      res.status(500).send("Internal Server Error");
+    }
+  }
+);
+
+// DELETE - Remove a movie from user's fav list
+app.delete(
+  "/Users/:Username/favorites/:MovieID",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    try {
+      const { Username, MovieID } = req.params;
+      const user = await Users.findOneAndUpdate(
+        { Username },
+        { $pull: { favoriteMovies: MovieID } },
+        { new: true }
+      );
+
+      if (!user) {
+        return res.status(400).send("No such user.");
+      }
+
+      res.json(user);
+    } catch (error) {
+      console.error(error);
+      res.status(500).send("Internal Server Error");
+    }
+  }
+);
+  
 
 const port = process.env.PORT || 8080;
 app.listen(port, '0.0.0.0', () => {
