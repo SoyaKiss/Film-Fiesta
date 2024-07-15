@@ -52,6 +52,23 @@ const generateTokens = (user) => {
   const refreshToken = jwt.sign(user, refreshTokenSecret, { expiresIn: refreshTokenExpiration });
   return { accessToken, refreshToken };
 };
+
+// Middleware to check token expiration
+const verifyToken = (req, res, next) => {
+  const token = req.headers['authorization'].split(' ')[1];
+  if (!token) return res.status(401).send('Unauthorized');
+
+  jwt.verify(token, secretKey, (err, user) => {
+    if (err) {
+      if (err.name === 'TokenExpiredError') {
+        return res.status(401).send('Token expired');
+      }
+      return res.status(403).send('Forbidden');
+    }
+    req.user = user;
+    next();
+  });
+};
   
 // Login endpoint
 app.post('/login', async (req, res) => {
