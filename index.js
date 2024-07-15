@@ -12,6 +12,11 @@ const Movies = Models.Movie;
 const Users = Models.User;
 
 const secretKey = 'your_secret_key';
+const refreshTokenSecret = 'your_refresh_token_secret';
+const tokenExpiration = '1h';
+const refreshTokenExpiration = '7d';
+
+let refreshTokens = [];
 
 mongoose
   .connect(process.env.MONGODB_URI)
@@ -30,7 +35,7 @@ let allowedOrigins = ['http://localhost:8080', 'http://localhost:1234', 'https:/
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) === -1) { // If a specific origin isn’t found on the list of allowed origins
+    if (allowedOrigins.indexOf(origin) === -1) {
       let message = 'The CORS policy for this application doesn’t allow access from origin ' + origin;
       return callback(new Error(message), false);
     }
@@ -39,6 +44,14 @@ app.use(cors({
 }));
 
 require('./auth.js')(app);
+
+// Function to generate tokens
+const generateTokens = (user) => {
+  const accessToken = jwt.sign(user, secretKey, { expiresIn: tokenExpiration });
+  const refreshToken = jwt.sign(user, refreshTokenSecret, { expiresIn: refreshTokenExpiration });
+  return { accessToken, refreshToken };
+};
+
 
 // POST - Create new user
 app.post(
@@ -133,6 +146,26 @@ app.post('/login', async (req, res) => {
     console.error('Error during login:', error);
     res.status(500).json({ message: 'Internal Server Error: ' + error.message });
   }
+});
+
+// Refresh token endpoint
+app.post('/token', (req, res) => {
+  const { token } = req.body;
+  if (!token) {
+    return res.status(401).send('Unauthorized');
+  }
+  if (!refreshTokens.includes(token)) {
+    return res.status(403).send('Forbidden');
+  }
+  jwt.verify(token, refreshTokenSecret, (err, user) => {
+    if (err) {
+      return res.status(403).send('Forbidden');
+    }
+    const newTokens = generateTokens({ id: user.id, username: user.username });
+    refreshTokens = refreshTokens.filter(t => t !== token);
+    refreshTokens.push(newTokens.refreshToken);
+    res.json(newTokens);
+  });
 });
 
 // PUT - Update User Info
