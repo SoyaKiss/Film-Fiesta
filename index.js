@@ -28,24 +28,71 @@ mongoose
     console.error('MongoDB connection error:', error);
   });
 
-const cors = require('cors');
+
+
+
+// OLD CODE:
+
+// const cors = require('cors');
+// let allowedOrigins = [
+//   'http://localhost:8080', 
+//   'http://localhost:1234', 
+//   'https://film-fiesta-marvel-movies.netlify.app', 
+//   'http://localhost:4200'
+// ];
+
+// app.use(cors({
+//   origin: (origin, callback) => {
+//     if (!origin) return callback(null, true);
+//     if (allowedOrigins.indexOf(origin) === -1) {
+//       let message = 'The CORS policy for this application doesn’t allow access from origin ' + origin;
+//       return callback(new Error(message), false);
+//     }
+//     return callback(null, true);
+//   }
+// }));
+
+
+
+
+
+// NEW CODE:
+
 let allowedOrigins = [
-  'http://localhost:8080', 
-  'http://localhost:1234', 
-  'https://film-fiesta-marvel-movies.netlify.app', 
-  'http://localhost:4200'
+  'http://localhost:8080',
+  'http://localhost:1234',
+  'https://film-fiesta-marvel-movies.netlify.app',
+  'http://localhost:4200' // Add your Angular frontend URL here
 ];
 
 app.use(cors({
   origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) === -1) {
-      let message = 'The CORS policy for this application doesn’t allow access from origin ' + origin;
-      return callback(new Error(message), false);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error('Not allowed by CORS'), false);
     }
-    return callback(null, true);
+  },
+  credentials: true, // Optional: allows cookies if needed
+}));
+
+// Handle preflight requests explicitly
+app.options('*', cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error('Not allowed by CORS'), false);
+    }
   }
 }));
+
+
+
+
 
 app.use(bodyParser.json());
 
