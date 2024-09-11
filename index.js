@@ -55,7 +55,6 @@ mongoose
 
 
 // NEW CODE:
-
 let allowedOrigins = [
   'http://localhost:8080',
   'http://localhost:1234',
@@ -93,9 +92,7 @@ app.options('*', cors({
 
 
 app.use(bodyParser.json());
-
 require('./auth.js')(app);
-
 // Function to generate tokens
 const generateTokens = (user) => {
   const accessToken = jwt.sign(user, secretKey, { expiresIn: tokenExpiration });
@@ -104,6 +101,7 @@ const generateTokens = (user) => {
 };
 
 
+// OLD CODE TO CREATE A NEW USER:
 // POST - Create new user
 app.post(
   '/users',
@@ -152,6 +150,73 @@ app.post(
     }
   }
 );
+
+
+
+
+
+// NEW CODE TO CREATE A NEW USER:
+// POST - Create new user
+app.post(
+  '/users',
+  [
+    check('Username', 'Username is required').isLength({ min: 5 }),
+    check('Username', 'Username contains non-alphanumeric characters - not allowed.').isAlphanumeric(),
+    check('Password', 'Password is required').not().isEmpty(),
+    check('Email', 'Email does not appear to be valid').isEmail(),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
+
+    try {
+      // Hash the password
+      const hashedPassword = await bcrypt.hash(req.body.Password, 10);
+
+      // Check if the user already exists
+      const existingUser = await Users.findOne({ Username: req.body.Username });
+      if (existingUser) {
+        return res.status(400).json({ message: `${req.body.Username} already exists` });
+      }
+
+      // Create a new user
+      const newUser = new Users({
+        Username: req.body.Username,
+        Password: hashedPassword,
+        Email: req.body.Email,
+        fullName: req.body.fullName,
+        Birthday: req.body.Birthday,
+      });
+
+      // Save the user to MongoDB
+      await newUser.save(); // Explicitly save the user and catch errors if any
+
+      // Generate JWT token for the new user
+      const token = jwt.sign({ id: newUser._id, username: newUser.Username }, secretKey, { expiresIn: '1h' });
+
+      // Send the response with the created user and token
+      res.status(201).json({
+        user: {
+          _id: newUser._id,
+          Username: newUser.Username,
+          Email: newUser.Email,
+          fullName: newUser.fullName,
+          favoriteMovies: newUser.favoriteMovies,
+        },
+        token,
+      });
+    } catch (error) {
+      // Log any errors that occur during the user creation process
+      console.error('Error creating user:', error);
+      res.status(500).json({ message: 'Internal Server Error: ' + error.message });
+    }
+  }
+);
+
+
+
 
 // GET: Get a list of movies
 app.get(
