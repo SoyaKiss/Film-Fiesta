@@ -5,6 +5,7 @@ let Models = require("./models.js");
 let bcrypt = require("bcrypt");
 let { check, validationResults } = require ("express-validator");
 
+
 let app = express();
 let Movies = Models.Movie;
 let Users = Models.User;
@@ -29,9 +30,10 @@ db.on("error", (err) => {
   console.error("MongoDB connection error:", err);
 });
 
-app.use(bodyParser.json());
 let cors = require("cors");
 app.use(cors());
+
+app.use(bodyParser.json());
 
 let auth = require("./auth.js")(app);
 let passport = require("passport");
