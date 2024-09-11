@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const { check, validationResult } = require('express-validator');
 const passport = require('passport');
 const Models = require('./models.js');
+let cors = require("cors");
 
 const app = express();
 const Movies = Models.Movie;
@@ -27,8 +28,6 @@ mongoose
     console.error('MongoDB connection error:', error);
   });
 
-app.use(bodyParser.json());
-
 const cors = require('cors');
 let allowedOrigins = ['http://localhost:8080', 'http://localhost:1234', 'https://film-fiesta-marvel-movies.netlify.app'];
 
@@ -42,6 +41,8 @@ app.use(cors({
     return callback(null, true);
   }
 }));
+
+app.use(bodyParser.json());
 
 require('./auth.js')(app);
 
