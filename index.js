@@ -284,15 +284,67 @@ app.post('/token', (req, res) => {
   });
 });
 
+
+
+
+// OLD CODE FOR EDITING USER PROFILE
+// app.put(
+//   "/users/:Username",
+//   passport.authenticate("jwt", { session: false }),
+//   async (req, res) => {
+//     if (req.user.Username !== req.params.Username) {
+//       return res.status(400).send("Permission denied");
+//     }
+
+//     const updates = {
+//       Username: req.body.Username,
+//       Email: req.body.Email,
+//       fullName: req.body.fullName,
+//       Birthday: req.body.Birthday,
+//     };
+
+//     // Only hash the password if it's being updated
+//     if (req.body.Password) {
+//       updates.Password = await bcrypt.hash(req.body.Password, 10);
+//     }
+
+//     try {
+//       const updatedUser = await Users.findOneAndUpdate(
+//         { Username: req.params.Username },
+//         { $set: updates },
+//         { new: true }
+//       );
+
+//       const token = jwt.sign({ id: updatedUser._id, username: updatedUser.Username }, secretKey, { expiresIn: '1h' });
+
+//       res.status(200).json({
+//         user: {
+//           _id: updatedUser._id,
+//           Username: updatedUser.Username,
+//           Email: updatedUser.Email,
+//           fullName: updatedUser.fullName,
+//           favoriteMovies: updatedUser.favoriteMovies,
+//         },
+//         token,
+//       });
+//     } catch (err) {
+//       console.log(err);
+//       res.status(500).send("Error: " + err);
+//     }
+//   }
+// );
+
 // PUT - Update User Info
 app.put(
   "/users/:Username",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
+    // Check if the logged-in user matches the user being updated
     if (req.user.Username !== req.params.Username) {
       return res.status(400).send("Permission denied");
     }
 
+    // Extract updated fields from the request body
     const updates = {
       Username: req.body.Username,
       Email: req.body.Email,
@@ -300,26 +352,38 @@ app.put(
       Birthday: req.body.Birthday,
     };
 
-    // Only hash the password if it's being updated
+    // Hash the password if it's being updated
     if (req.body.Password) {
       updates.Password = await bcrypt.hash(req.body.Password, 10);
     }
 
     try {
+      // Find the user by username and update their information
       const updatedUser = await Users.findOneAndUpdate(
         { Username: req.params.Username },
         { $set: updates },
-        { new: true }
+        { new: true } // Return the updated document
       );
 
-      const token = jwt.sign({ id: updatedUser._id, username: updatedUser.Username }, secretKey, { expiresIn: '1h' });
+      if (!updatedUser) {
+        return res.status(404).send("User not found.");
+      }
 
+      // Generate a new token if necessary
+      const token = jwt.sign(
+        { id: updatedUser._id, username: updatedUser.Username },
+        secretKey,
+        { expiresIn: '1h' }
+      );
+
+      // Send back the updated user information and token
       res.status(200).json({
         user: {
           _id: updatedUser._id,
           Username: updatedUser.Username,
           Email: updatedUser.Email,
           fullName: updatedUser.fullName,
+          Birthday: updatedUser.Birthday,
           favoriteMovies: updatedUser.favoriteMovies,
         },
         token,
@@ -330,6 +394,12 @@ app.put(
     }
   }
 );
+
+
+
+
+
+
 
 // DELETE - Allow user to deregister
 app.delete(
