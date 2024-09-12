@@ -28,32 +28,6 @@ mongoose
     console.error('MongoDB connection error:', error);
   });
 
-
-
-
-// OLD CODE:
-// let allowedOrigins = [
-//   'http://localhost:8080', 
-//   'http://localhost:1234', 
-//   'https://film-fiesta-marvel-movies.netlify.app', 
-//   'http://localhost:4200'
-// ];
-
-// app.use(cors({
-//   origin: (origin, callback) => {
-//     if (!origin) return callback(null, true);
-//     if (allowedOrigins.indexOf(origin) === -1) {
-//       let message = 'The CORS policy for this application doesn’t allow access from origin ' + origin;
-//       return callback(new Error(message), false);
-//     }
-//     return callback(null, true);
-//   }
-// }));
-
-
-
-
-
 // NEW CODE:
 let allowedOrigins = [
   'http://localhost:8080',
@@ -87,10 +61,6 @@ app.options('*', cors({
   }
 }));
 
-
-
-
-
 app.use(bodyParser.json());
 require('./auth.js')(app);
 // Function to generate tokens
@@ -99,60 +69,6 @@ const generateTokens = (user) => {
   const refreshToken = jwt.sign(user, refreshTokenSecret, { expiresIn: refreshTokenExpiration });
   return { accessToken, refreshToken };
 };
-
-
-// OLD CODE TO CREATE A NEW USER:
-// POST - Create new user
-app.post(
-  '/users',
-  [
-    check('Username', 'Username is required').isLength({ min: 5 }),
-    check('Username', 'Username contains non alphanumeric characters - not allowed.').isAlphanumeric(),
-    check('Password', 'Password is required').not().isEmpty(),
-    check('Email', 'Email does not appear to be valid').isEmail(),
-  ],
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(422).json({ errors: errors.array() });
-    }
-
-    const hashedPassword = await bcrypt.hash(req.body.Password, 10);
-    try {
-      const existingUser = await Users.findOne({ Username: req.body.Username });
-      if (existingUser) {
-        return res.status(400).json({ message: `${req.body.Username} already exists` });
-      }
-      const newUser = await Users.create({
-        Username: req.body.Username,
-        Password: hashedPassword,
-        Email: req.body.Email,
-        fullName: req.body.fullName,
-        Birthday: req.body.Birthday,
-      });
-
-      const token = jwt.sign({ id: newUser._id, username: newUser.Username }, secretKey, { expiresIn: '1h' });
-
-      res.status(201).json({
-        user: {
-          _id: newUser._id,
-          Username: newUser.Username,
-          Email: newUser.Email,
-          fullName: newUser.fullName,
-          favoriteMovies: newUser.favoriteMovies,
-        },
-        token,
-      });
-
-    } catch (error) {
-      console.error('Error creating user:', error);
-      res.status(500).json({ message: 'Internal Server Error: ' + error.message });
-    }
-  }
-);
-
-
-
 
 
 // NEW CODE TO CREATE A NEW USER:
@@ -214,8 +130,6 @@ app.post(
     }
   }
 );
-
-
 
 
 // GET: Get a list of movies
@@ -284,56 +198,6 @@ app.post('/token', (req, res) => {
   });
 });
 
-
-
-
-// OLD CODE FOR EDITING USER PROFILE
-// app.put(
-//   "/users/:Username",
-//   passport.authenticate("jwt", { session: false }),
-//   async (req, res) => {
-//     if (req.user.Username !== req.params.Username) {
-//       return res.status(400).send("Permission denied");
-//     }
-
-//     const updates = {
-//       Username: req.body.Username,
-//       Email: req.body.Email,
-//       fullName: req.body.fullName,
-//       Birthday: req.body.Birthday,
-//     };
-
-//     // Only hash the password if it's being updated
-//     if (req.body.Password) {
-//       updates.Password = await bcrypt.hash(req.body.Password, 10);
-//     }
-
-//     try {
-//       const updatedUser = await Users.findOneAndUpdate(
-//         { Username: req.params.Username },
-//         { $set: updates },
-//         { new: true }
-//       );
-
-//       const token = jwt.sign({ id: updatedUser._id, username: updatedUser.Username }, secretKey, { expiresIn: '1h' });
-
-//       res.status(200).json({
-//         user: {
-//           _id: updatedUser._id,
-//           Username: updatedUser.Username,
-//           Email: updatedUser.Email,
-//           fullName: updatedUser.fullName,
-//           favoriteMovies: updatedUser.favoriteMovies,
-//         },
-//         token,
-//       });
-//     } catch (err) {
-//       console.log(err);
-//       res.status(500).send("Error: " + err);
-//     }
-//   }
-// );
-
 // PUT - Update User Info
 app.put(
   "/Users/:Username",
@@ -394,11 +258,6 @@ app.put(
     }
   }
 );
-
-
-
-
-
 
 
 // DELETE - Allow user to deregister
