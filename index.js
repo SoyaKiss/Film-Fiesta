@@ -131,6 +131,26 @@ app.post(
   }
 );
 
+// GET - Get a user's information
+app.get(
+  "/users/:Username",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    try {
+      const { Username } = req.params;
+      const user = await Users.findOne({ Username });
+      if (!user) {
+        return res.status(404).send("User not found.");
+      }
+      res.status(200).json(user);
+    } catch (error) {
+      console.error('Error fetching user:', error);
+      res.status(500).send("Internal Server Error: " + error.message);
+    }
+  }
+);
+
+
 
 // GET: Get a list of movies
 app.get(
@@ -147,6 +167,8 @@ app.get(
   }
 );
 
+
+// POST - login
 app.post('/login', async (req, res) => {
   const { Username, Password } = req.body;
   try {
@@ -178,6 +200,7 @@ app.post('/login', async (req, res) => {
   }
 });
 
+
 // Refresh token endpoint
 app.post('/token', (req, res) => {
   const { token } = req.body;
@@ -197,6 +220,7 @@ app.post('/token', (req, res) => {
     res.json(newTokens);
   });
 });
+
 
 // PUT - Update User Info
 app.put(
@@ -281,6 +305,7 @@ app.delete(
   }
 );
 
+
 // POST - Add a movie to the user's favorites
 app.post(
   "/Users/:Username/favorites/:MovieID",
@@ -306,6 +331,7 @@ app.post(
   }
 );
 
+
 // GET - Get a user's fav movies
 app.get(
   "/Users/:Username/favorites",
@@ -326,6 +352,7 @@ app.get(
     }
   }
 );
+
 
 // DELETE - Remove a movie from user's fav list
 app.delete(
