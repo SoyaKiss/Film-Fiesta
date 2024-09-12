@@ -282,7 +282,7 @@ app.put(
 
 // DELETE - Allow user to deregister
 app.delete(
-  "/users/:Username", // Ensure consistency in casing for the endpoint
+  "/Users/:Username", // Ensure consistency in casing for the endpoint
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     try {
