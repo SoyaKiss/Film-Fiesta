@@ -336,7 +336,7 @@ app.post('/token', (req, res) => {
 
 // PUT - Update User Info
 app.put(
-  "/users/:Username",
+  "/Users/:Username",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     // Check if the logged-in user matches the user being updated
@@ -403,7 +403,7 @@ app.put(
 
 // DELETE - Allow user to deregister
 app.delete(
-  "/users/:Username",
+  "/Users/:Username",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     try {
@@ -424,7 +424,7 @@ app.delete(
 
 // POST - Add a movie to the user's favorites
 app.post(
-  "/users/:Username/favorites/:MovieID",
+  "/Users/:Username/favorites/:MovieID",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     try {
@@ -449,7 +449,7 @@ app.post(
 
 // GET - Get a user's fav movies
 app.get(
-  "/users/:Username/favorites",
+  "/Users/:Username/favorites",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     try {
@@ -470,7 +470,7 @@ app.get(
 
 // DELETE - Remove a movie from user's fav list
 app.delete(
-  "/users/:Username/favorites/:MovieID",
+  "/Users/:Username/favorites/:MovieID",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     try {
