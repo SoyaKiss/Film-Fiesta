@@ -224,15 +224,13 @@ app.post('/token', (req, res) => {
 
 // PUT - Update User Info
 app.put(
-  "/Users/:Username",
+  "/users/:Username",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
-    // Check if the logged-in user matches the user being updated
     if (req.user.Username !== req.params.Username) {
       return res.status(400).send("Permission denied");
     }
 
-    // Extract updated fields from the request body
     const updates = {
       Username: req.body.Username,
       Email: req.body.Email,
@@ -246,25 +244,23 @@ app.put(
     }
 
     try {
-      // Find the user by username and update their information
       const updatedUser = await Users.findOneAndUpdate(
         { Username: req.params.Username },
         { $set: updates },
-        { new: true } // Return the updated document
+        { new: true }
       );
 
       if (!updatedUser) {
         return res.status(404).send("User not found.");
       }
 
-      // Generate a new token if necessary
+      // Generate a new token if the password is updated
       const token = jwt.sign(
         { id: updatedUser._id, username: updatedUser.Username },
         secretKey,
         { expiresIn: '1h' }
       );
 
-      // Send back the updated user information and token
       res.status(200).json({
         user: {
           _id: updatedUser._id,
@@ -274,7 +270,7 @@ app.put(
           Birthday: updatedUser.Birthday,
           favoriteMovies: updatedUser.favoriteMovies,
         },
-        token,
+        token, // Include the new token
       });
     } catch (err) {
       console.log(err);
