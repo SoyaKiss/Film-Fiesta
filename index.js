@@ -282,7 +282,7 @@ app.put(
 
 // DELETE - Allow user to deregister
 app.delete(
-  "/Users/:Username",
+  "/users/:Username", // Ensure consistency in casing for the endpoint
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     try {
@@ -290,17 +290,16 @@ app.delete(
       const user = await Users.findOneAndDelete({ Username });
 
       if (user) {
-        res.status(200).send(`${user.Username} has been deleted.`);
+        res.status(200).json({ message: `${user.Username} has been deleted.` }); // Return JSON response
       } else {
-        res.status(404).send("User not found.");
+        res.status(404).json({ message: "User not found." });
       }
     } catch (error) {
       console.error(error);
-      res.status(500).send("Internal Server Error");
+      res.status(500).json({ message: "Internal Server Error: " + error.message });
     }
   }
 );
-
 
 
 // POST - Add a movie to the user's favorites
