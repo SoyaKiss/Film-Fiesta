@@ -403,7 +403,7 @@ app.put(
 
 // DELETE - Allow user to deregister
 app.delete(
-  "/Users/:Username",
+  "/users/:Username",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     try {
@@ -424,7 +424,7 @@ app.delete(
 
 // POST - Add a movie to the user's favorites
 app.post(
-  "/Users/:Username/favorites/:MovieID",
+  "/users/:Username/favorites/:MovieID",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     try {
@@ -449,7 +449,7 @@ app.post(
 
 // GET - Get a user's fav movies
 app.get(
-  "/Users/:Username/favorites",
+  "/users/:Username/favorites",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     try {
@@ -470,7 +470,7 @@ app.get(
 
 // DELETE - Remove a movie from user's fav list
 app.delete(
-  "/Users/:Username/favorites/:MovieID",
+  "/users/:Username/favorites/:MovieID",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     try {
