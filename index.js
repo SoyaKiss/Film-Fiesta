@@ -374,7 +374,35 @@ app.delete(
     }
   }
 );
-  
+
+
+// NEW END POINT TO ADD FOR FAVORITE MOVIES 
+// POST - Get movie details for a list of IDs
+app.post(
+  '/movies/details',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res) => {
+    const { movieIds } = req.body; // Expecting an array of movie IDs from the request body
+
+    if (!Array.isArray(movieIds) || movieIds.length === 0) {
+      return res.status(400).send('Invalid request. Provide an array of movie IDs.');
+    }
+
+    try {
+      // Fetch movies that match the provided IDs
+      const movies = await Movies.find({ _id: { $in: movieIds } });
+
+      if (!movies || movies.length === 0) {
+        return res.status(404).send('Movies not found.');
+      }
+
+      res.status(200).json(movies);
+    } catch (error) {
+      console.error('Error fetching movie details:', error);
+      res.status(500).send('Internal Server Error: ' + error.message);
+    }
+  }
+);
 
 const port = process.env.PORT || 8080;
 app.listen(port, '0.0.0.0', () => {
