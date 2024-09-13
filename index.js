@@ -1,4 +1,3 @@
-require('dotenv').config(); 
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
@@ -62,21 +61,8 @@ app.options('*', cors({
   }
 }));
 
-app.use(bodyParser.json({ strict: false })); // Ensure body-parser is correctly set up
-app.use((err, req, res, next) => {
-  if (err instanceof SyntaxError) {
-    res.status(400).send({ message: 'Invalid JSON payload' });
-  } else {
-    next();
-  }
-});
-
-
+app.use(bodyParser.json());
 require('./auth.js')(app);
-
-
-
-
 // Function to generate tokens
 const generateTokens = (user) => {
   const accessToken = jwt.sign(user, secretKey, { expiresIn: tokenExpiration });
@@ -224,33 +210,29 @@ app.post('/token', (req, res) => {
   if (!refreshTokens.includes(token)) {
     return res.status(403).send('Forbidden');
   }
-
-  try {
-    jwt.verify(token, refreshTokenSecret, (err, user) => {
-      if (err) {
-        return res.status(403).send('Forbidden');
-      }
-      const newTokens = generateTokens({ id: user.id, username: user.username });
-      refreshTokens = refreshTokens.filter(t => t !== token);
-      refreshTokens.push(newTokens.refreshToken);
-      res.json(newTokens);
-    });
-  } catch (error) {
-    console.error('Error during token refresh:', error);
-    res.status(500).send('Internal Server Error');
-  }
+  jwt.verify(token, refreshTokenSecret, (err, user) => {
+    if (err) {
+      return res.status(403).send('Forbidden');
+    }
+    const newTokens = generateTokens({ id: user.id, username: user.username });
+    refreshTokens = refreshTokens.filter(t => t !== token);
+    refreshTokens.push(newTokens.refreshToken);
+    res.json(newTokens);
+  });
 });
 
 
 // PUT - Update User Info
 app.put(
-  "/users/:Username",
+  "/Users/:Username",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
+    // Check if the logged-in user matches the user being updated
     if (req.user.Username !== req.params.Username) {
       return res.status(400).send("Permission denied");
     }
 
+    // Extract updated fields from the request body
     const updates = {
       Username: req.body.Username,
       Email: req.body.Email,
@@ -264,23 +246,25 @@ app.put(
     }
 
     try {
+      // Find the user by username and update their information
       const updatedUser = await Users.findOneAndUpdate(
         { Username: req.params.Username },
         { $set: updates },
-        { new: true }
+        { new: true } // Return the updated document
       );
 
       if (!updatedUser) {
         return res.status(404).send("User not found.");
       }
 
-      // Generate a new token if the password is updated
+      // Generate a new token if necessary
       const token = jwt.sign(
         { id: updatedUser._id, username: updatedUser.Username },
         secretKey,
         { expiresIn: '1h' }
       );
 
+      // Send back the updated user information and token
       res.status(200).json({
         user: {
           _id: updatedUser._id,
@@ -290,7 +274,7 @@ app.put(
           Birthday: updatedUser.Birthday,
           favoriteMovies: updatedUser.favoriteMovies,
         },
-        token, // Include the new token
+        token,
       });
     } catch (err) {
       console.log(err);
@@ -302,7 +286,7 @@ app.put(
 
 // DELETE - Allow user to deregister
 app.delete(
-  "/Users/:Username", // Ensure consistency in casing for the endpoint
+  "/Users/:Username",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     try {
@@ -310,13 +294,13 @@ app.delete(
       const user = await Users.findOneAndDelete({ Username });
 
       if (user) {
-        res.status(200).json({ message: `${user.Username} has been deleted.` }); // Return JSON response
+        res.status(200).send(`${user.Username} has been deleted.`);
       } else {
-        res.status(404).json({ message: "User not found." });
+        res.status(404).send("User not found.");
       }
     } catch (error) {
       console.error(error);
-      res.status(500).json({ message: "Internal Server Error: " + error.message });
+      res.status(500).send("Internal Server Error");
     }
   }
 );
@@ -394,38 +378,11 @@ app.delete(
     }
   }
 );
-
-
-// NEW END POINT TO ADD FOR FAVORITE MOVIES 
-// POST - Get movie details for a list of IDs
-app.post(
-  '/movies/details',
-  passport.authenticate('jwt', { session: false }),
-  async (req, res) => {
-    const { movieIds } = req.body; // Expecting an array of movie IDs from the request body
-
-    if (!Array.isArray(movieIds) || movieIds.length === 0) {
-      return res.status(400).send('Invalid request. Provide an array of movie IDs.');
-    }
-
-    try {
-      // Fetch movies that match the provided IDs
-      const movies = await Movies.find({ _id: { $in: movieIds } });
-
-      if (!movies || movies.length === 0) {
-        return res.status(404).send('Movies not found.');
-      }
-
-      res.status(200).json(movies);
-    } catch (error) {
-      console.error('Error fetching movie details:', error);
-      res.status(500).send('Internal Server Error: ' + error.message);
-    }
-  }
-);
+  
 
 const port = process.env.PORT || 8080;
 app.listen(port, '0.0.0.0', () => {
   console.log('Listening on Port ' + port);
 });
+
 
