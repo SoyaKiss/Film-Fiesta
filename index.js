@@ -1,3 +1,4 @@
+require('dotenv').config(); 
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
@@ -61,8 +62,21 @@ app.options('*', cors({
   }
 }));
 
-app.use(bodyParser.json());
+app.use(bodyParser.json({ strict: false })); // Ensure body-parser is correctly set up
+app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError) {
+    res.status(400).send({ message: 'Invalid JSON payload' });
+  } else {
+    next();
+  }
+});
+
+
 require('./auth.js')(app);
+
+
+
+
 // Function to generate tokens
 const generateTokens = (user) => {
   const accessToken = jwt.sign(user, secretKey, { expiresIn: tokenExpiration });
