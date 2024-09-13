@@ -210,15 +210,21 @@ app.post('/token', (req, res) => {
   if (!refreshTokens.includes(token)) {
     return res.status(403).send('Forbidden');
   }
-  jwt.verify(token, refreshTokenSecret, (err, user) => {
-    if (err) {
-      return res.status(403).send('Forbidden');
-    }
-    const newTokens = generateTokens({ id: user.id, username: user.username });
-    refreshTokens = refreshTokens.filter(t => t !== token);
-    refreshTokens.push(newTokens.refreshToken);
-    res.json(newTokens);
-  });
+
+  try {
+    jwt.verify(token, refreshTokenSecret, (err, user) => {
+      if (err) {
+        return res.status(403).send('Forbidden');
+      }
+      const newTokens = generateTokens({ id: user.id, username: user.username });
+      refreshTokens = refreshTokens.filter(t => t !== token);
+      refreshTokens.push(newTokens.refreshToken);
+      res.json(newTokens);
+    });
+  } catch (error) {
+    console.error('Error during token refresh:', error);
+    res.status(500).send('Internal Server Error');
+  }
 });
 
 
