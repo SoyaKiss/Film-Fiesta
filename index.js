@@ -33,7 +33,8 @@ let allowedOrigins = [
   'http://localhost:8080',
   'http://localhost:1234',
   'https://film-fiesta-marvel-movies.netlify.app',
-  'http://localhost:4200' // Add your Angular frontend URL here
+  'http://localhost:4200', // Add your Angular frontend URL here
+  'https://soyakiss.github.io',
 ];
 
 app.use(cors({
