@@ -47,9 +47,14 @@
             <li>Returns data about a genre, with a name and description.</li>
         </ul>
     </li>
-    <li><strong>main Actor View:</strong>
+    <li><strong>Main Actor View:</strong>
         <ul>
-            <li>Returns data about a main Actor (name, birth year).</li>
+            <li>Returns data about a main actor (name, birth year).</li>
+        </ul>
+    </li>
+        <li><strong>Supporting Actor View:</strong>
+        <ul>
+            <li>Returns data about a supporting actor (name, birth year).</li>
         </ul>
     </li>
 </ul>
