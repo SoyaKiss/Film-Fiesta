@@ -60,6 +60,7 @@
         </ul>
     </li>
 
-    <h4>Technical Requirements:</h4>
+<h4>Technical Requirements:</h4>
 <ul>
     <li>The application must be a single-page application (SPA)</li>
+</ul>
