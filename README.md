@@ -52,13 +52,6 @@
             <li>Returns data about a main Actor (name, birth year).</li>
         </ul>
     </li>
-    <li><strong>Single Movie View (Optional Features):</strong>
-        <ul>
-            <li>Allow users to see which actors star in which movies.</li>
-            <li>Allow users to view more information about different movies.</li>
-            <li>Allow users to access different movie information, such as genre description and main actor bio, without leaving the view (e.g., tooltips).</li>
-        </ul>
-    </li>
 </ul>
 
 
