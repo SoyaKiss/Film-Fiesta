@@ -59,3 +59,7 @@
             <li>Allow users to access different movie information, such as genre description and main actor bio, without leaving the view (e.g., tooltips).</li>
         </ul>
     </li>
+
+    <h4>Technical Requirements:</h4>
+<ul>
+    <li>The application must be a single-page application (SPA)</li>
