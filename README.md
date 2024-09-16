@@ -59,6 +59,8 @@
             <li>Allow users to access different movie information, such as genre description and main actor bio, without leaving the view (e.g., tooltips).</li>
         </ul>
     </li>
+</ul>
+
 
 <h4>Technical Requirements:</h4>
 <ul>
