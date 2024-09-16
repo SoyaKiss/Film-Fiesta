@@ -45,32 +45,17 @@
     <li><strong>Genre View:</strong>
         <ul>
             <li>Returns data about a genre, with a name and description.</li>
-            <li>Displays example movies.</li>
         </ul>
     </li>
-    <li><strong>Director View:</strong>
+    <li><strong>main Actor View:</strong>
         <ul>
-            <li>Returns data about a director (name, bio, birth year, death year).</li>
-            <li>Displays example movies from the director.</li>
+            <li>Returns data about a main Actor (name, birth year).</li>
         </ul>
     </li>
     <li><strong>Single Movie View (Optional Features):</strong>
         <ul>
             <li>Allow users to see which actors star in which movies.</li>
-            <li>Allow users to view more information about different movies, such as the release date and movie rating.</li>
-            <li>Allow users to access different movie information, such as genre description and director bio, without leaving the view (e.g., tooltips).</li>
-            <li>Allow users to share a movie.</li>
-            <li>Display a list of related or similar movies.</li>
+            <li>Allow users to view more information about different movies.</li>
+            <li>Allow users to access different movie information, such as genre description and main actor bio, without leaving the view (e.g., tooltips).</li>
         </ul>
     </li>
-    <li><strong>Main View (Optional Features):</strong>
-        <ul>
-            <li>Allow users to sort movies based on different criteria.</li>
-        </ul>
-    </li>
-    <li><strong>Profile, Single Movie, and Main Views (Optional Features):</strong>
-        <ul>
-            <li>Allow users to create a “To Watch” list in addition to their “Favorite Movies” list.</li>
-        </ul>
-    </li>
-</ul>
