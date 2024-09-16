@@ -65,4 +65,12 @@
 <h4>Technical Requirements:</h4>
 <ul>
     <li>The application must be a single-page application (SPA)</li>
+    <li>The application must use state routing to navigate between views and share URLs</li>
+    <li>The application must give users the option to filter movies using a “search” feature</li>
+    <li>The application must use Parcel as its build tool</li>
+    <li>The application must be written using the React library and in ES2015+</li>
+    <li>The application must use Bootstrap as a UI library for styling and responsiveness</li>
+    <li>The application must contain function components</li>
+    <li>The application must be hosted online</li>
+    <li>The application may use React Redux for state management of at least one feature (ex: filtering movies)</li>
 </ul>
